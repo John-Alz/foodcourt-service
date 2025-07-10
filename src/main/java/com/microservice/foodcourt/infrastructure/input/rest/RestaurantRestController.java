@@ -3,7 +3,6 @@ package com.microservice.foodcourt.infrastructure.input.rest;
 import com.microservice.foodcourt.application.dto.request.RestaurantRequestDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
 import com.microservice.foodcourt.application.handler.IRestaurantHandler;
-import com.microservice.foodcourt.infrastructure.out.jpa.entity.RestaurantEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
