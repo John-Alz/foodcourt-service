@@ -1,0 +1,23 @@
+package com.microservice.foodcourt.domain.utils;
+
+public class DomainConstants {
+
+    private DomainConstants() {}
+
+    public static final String REGEX_PHONE_NUMBER = "^\\+?[0-9]{1,13}$";
+    public static final String REGEX_ONLY_NUMBER = "^[0-9]+$";
+    public static final String REGEX_NAME = "^(?!\\d+$).+$";
+
+
+    public static final String REQUIRED_NAME = "El nombre es requerido.";
+    public static final String INVALID_NAME = "El nombre no puede ser formado por solo numeros.";
+    public static final String REQUIRED_NIT = "El NIT es requerido.";
+    public static final String INVALID_NIT = "El NIT debe ser solo numerico.";
+    public static final String REQUIRED_ADDRESS = "LA direccion es requerida.";
+    public static final String REQUIRED_PHONENUMBER = "El numero de telefono es requerido.";
+    public static final String INVALID_PHONENUMBER = "El numero de telefeono tiene un formato invalido, eje: (+573005698325).";
+    public static final String REQUIRED_URLLOGO = "El logo es requerido.";
+    public static final String REQUIRED_OWNERID = "El Id del propietario es requerido.";
+
+
+}

@@ -1,0 +1,27 @@
+package com.microservice.foodcourt.application.handler.impl;
+
+import com.microservice.foodcourt.application.dto.request.RestaurantRequestDto;
+import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
+import com.microservice.foodcourt.application.handler.IRestaurantHandler;
+import com.microservice.foodcourt.application.mapper.IRestaurantMapper;
+import com.microservice.foodcourt.domain.api.IRestaurantServicePort;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class RestaurantHandler implements IRestaurantHandler {
+
+    private final IRestaurantServicePort restaurantServicePort;
+    private final IRestaurantMapper restaurantMapper;
+
+    @Override
+    public SaveMessageResponse saveRestaurant(RestaurantRequestDto restaurantRequestDto) {
+        restaurantServicePort.saveRestaurant(restaurantMapper.requestToModel(restaurantRequestDto));
+        return new SaveMessageResponse("Restaurante creado.", LocalDateTime.now());
+    }
+}
