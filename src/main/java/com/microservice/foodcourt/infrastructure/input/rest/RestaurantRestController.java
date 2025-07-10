@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api/v1/restaurant")
 @RequiredArgsConstructor
-@Tag(name = "Plaza de comidas", description = "Endpoints de gestion de plaza de comidas.")
+@Tag(name = "Restaurantes", description = "Endpoints de gestion de restaurantes.")
 public class RestaurantRestController {
 
     private final IRestaurantHandler restaurantHandler;
