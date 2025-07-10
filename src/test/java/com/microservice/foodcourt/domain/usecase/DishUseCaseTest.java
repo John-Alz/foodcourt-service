@@ -68,4 +68,35 @@ class DishUseCaseTest {
         verify(restaurantPersistencePort, times(1)).validateExist(10L);
         verify(dishPersistencePort, times(1)).saveDish(dishModel);
     }
+
+    @Test
+    void updateDish_ShouldUpdateAndSaveDish() {
+        // Arrange
+        DishModel existingDish = new DishModel();
+        existingDish.setId(100L);
+        existingDish.setPrice(new BigDecimal("20000"));
+        existingDish.setDescription("Old description");
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(10L);
+        existingDish.setRestaurant(restaurant);
+
+        DishModel updateDish = new DishModel();
+        updateDish.setPrice(new BigDecimal("25000"));
+        updateDish.setDescription("New updated description");
+
+        when(dishPersistencePort.findById(100L)).thenReturn(existingDish);
+
+        // Act
+        dishUseCase.updateDish(100L, updateDish);
+
+        // Assert
+        verify(dishPersistencePort, times(1)).findById(100L);
+        verify(restaurantPersistencePort, times(1)).validateRestaurantOwnership(10L, 1L);
+        verify(dishPersistencePort, times(1)).saveDish(existingDish);
+
+        assert existingDish.getPrice().equals(new BigDecimal("25000"));
+        assert existingDish.getDescription().equals("New updated description");
+    }
+
 }

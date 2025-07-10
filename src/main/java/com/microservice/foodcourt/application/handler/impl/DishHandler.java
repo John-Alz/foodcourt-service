@@ -1,6 +1,7 @@
 package com.microservice.foodcourt.application.handler.impl;
 
 import com.microservice.foodcourt.application.dto.request.DishRequestDto;
+import com.microservice.foodcourt.application.dto.request.DishUpdateRequestDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
 import com.microservice.foodcourt.application.handler.IDishHandler;
 import com.microservice.foodcourt.application.mapper.IDishMapper;
@@ -24,5 +25,11 @@ public class DishHandler implements IDishHandler {
     public SaveMessageResponse saveDish(DishRequestDto dishRequestDto) {
         dishServicePort.saveDish(dishMapper.requestToModel(dishRequestDto));
         return new SaveMessageResponse("Plato creado.", LocalDateTime.now());
+    }
+
+    @Override
+    public SaveMessageResponse updateDish(Long id, DishUpdateRequestDto dishUpdateRequestDto) {
+        dishServicePort.updateDish(id, dishMapper.updateRequestToModel(dishUpdateRequestDto));
+        return new SaveMessageResponse("Plato actualizado", LocalDateTime.now());
     }
 }
