@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,6 +29,7 @@ public class DishRestController {
             @ApiResponse(responseCode = "404", description = "Error de validacion", content = @Content),
     })
     @PostMapping()
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<SaveMessageResponse> saveDish(@RequestBody DishRequestDto dishRequestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(dishHandler.saveDish(dishRequestDto));
     }
@@ -38,6 +40,7 @@ public class DishRestController {
             @ApiResponse(responseCode = "404", description = "Error de validacion", content = @Content),
     })
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<SaveMessageResponse> updateDish(@PathVariable Long id, @RequestBody DishUpdateRequestDto dishUpdateRequestDto) {
         return ResponseEntity.status(HttpStatus.OK).body(dishHandler.updateDish(id, dishUpdateRequestDto));
     }
