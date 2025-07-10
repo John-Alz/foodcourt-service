@@ -25,6 +25,12 @@ class RestaurantRulesValidatorTest {
     }
 
     @Test
+    void validateName_ShouldThrowRequiredFieldException_WhenIsEmpty() {
+        RequiredFieldException exception = assertThrows(RequiredFieldException.class, () -> validator.validateName("     "));
+        assertEquals("El nombre es requerido.", exception.getMessage());
+    }
+
+    @Test
     void validateName_ShouldThrowInvalidFieldException_WhenOnlyNumbers() {
         InvalidFieldException exception = assertThrows(InvalidFieldException.class, () -> validator.validateName("123456"));
         assertEquals("El nombre no puede ser formado por solo numeros.", exception.getMessage());
@@ -66,6 +72,12 @@ class RestaurantRulesValidatorTest {
     @Test
     void validatePhoneNumber_ShouldThrowRequiredFieldException_WhenNull() {
         RequiredFieldException exception = assertThrows(RequiredFieldException.class, () -> validator.validatePhoneNumber(null));
+        assertEquals("El numero de telefono es requerido.", exception.getMessage());
+    }
+
+    @Test
+    void validatePhoneNumber_ShouldThrowRequiredFieldException_WhenIsEmpty() {
+        RequiredFieldException exception = assertThrows(RequiredFieldException.class, () -> validator.validatePhoneNumber("   "));
         assertEquals("El numero de telefono es requerido.", exception.getMessage());
     }
 

@@ -3,6 +3,7 @@ package com.microservice.foodcourt.infrastructure.out.jpa.adapter;
 import com.microservice.foodcourt.domain.model.RestaurantModel;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
 import com.microservice.foodcourt.infrastructure.clients.UserClient;
+import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,5 +19,12 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     public void saveRestaurant(RestaurantModel restaurantModel) {
         userClient.validateUser(restaurantModel.getOwnerId(), "OWNER");
         restaurantRepository.save(restaurantEntityMapper.toEntity(restaurantModel));
+    }
+
+    @Override
+    public void validateExist(Long id) {
+        if (!restaurantRepository.existsById(id)) {
+            throw new NoDataFoundException("No existe un restaurante con ese id");
+        }
     }
 }

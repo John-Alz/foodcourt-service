@@ -24,13 +24,11 @@ class RestaurantUseCaseTest {
 
     @Test
     void saveRestaurant_ShouldValidateAndSave() {
-        // Arrange
-        RestaurantModel restaurantModel = new RestaurantModel(); // Usa un constructor válido si existe
 
-        // Act
+        RestaurantModel restaurantModel = new RestaurantModel();
+
         restaurantUseCase.saveRestaurant(restaurantModel);
 
-        // Assert
         verify(restaurantRulesValidator, times(1)).validateRestaurantData(restaurantModel);
         verify(restaurantPersistencePort, times(1)).saveRestaurant(restaurantModel);
         verifyNoMoreInteractions(restaurantRulesValidator, restaurantPersistencePort);

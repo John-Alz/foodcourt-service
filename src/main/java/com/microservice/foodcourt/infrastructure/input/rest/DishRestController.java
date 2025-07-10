@@ -1,8 +1,8 @@
 package com.microservice.foodcourt.infrastructure.input.rest;
 
-import com.microservice.foodcourt.application.dto.request.RestaurantRequestDto;
+import com.microservice.foodcourt.application.dto.request.DishRequestDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
-import com.microservice.foodcourt.application.handler.IRestaurantHandler;
+import com.microservice.foodcourt.application.handler.IDishHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,21 +17,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/restaurant")
+@RequestMapping("api/v1/dish")
 @RequiredArgsConstructor
-@Tag(name = "Restaurantes", description = "Endpoints de gestion de restaurantes.")
-public class RestaurantRestController {
+@Tag(name = "Platos", description = "Endpoints de gestion de plaza de platos.")
+public class DishRestController {
 
-    private final IRestaurantHandler restaurantHandler;
+    private final IDishHandler dishHandler;
 
-    @Operation(summary = "Crear un nuevo restaurante.")
+    @Operation(summary = "Crear un nuevo plato.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Restaurante creado.", content = @Content),
+            @ApiResponse(responseCode = "201", description = "Plato creado.", content = @Content),
             @ApiResponse(responseCode = "404", description = "Error de validacion", content = @Content),
     })
     @PostMapping()
-    public ResponseEntity<SaveMessageResponse> saveRestaurant(@RequestBody RestaurantRequestDto restaurantRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(restaurantHandler.saveRestaurant(restaurantRequestDto));
+    public ResponseEntity<SaveMessageResponse> saveDish(@RequestBody DishRequestDto dishRequestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(dishHandler.saveDish(dishRequestDto));
     }
 
 }
