@@ -30,7 +30,7 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ExceptionRespnse> handleUnauthorizedException(UnauthorizedException e) {
-        return ResponseEntity.badRequest().body(new ExceptionRespnse("No tienes permiso para editar este plato.", LocalDateTime.now()));
+        return ResponseEntity.badRequest().body(new ExceptionRespnse("Acción no permitida: el restaurante no es de tu propiedad.", LocalDateTime.now()));
     }
 
 }

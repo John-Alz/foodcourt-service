@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,17 +87,83 @@ class DishUseCaseTest {
         updateDish.setDescription("New updated description");
 
         when(dishPersistencePort.findById(100L)).thenReturn(existingDish);
+        when(dishPersistencePort.getUserId()).thenReturn(1L); // ✅ Esto faltaba
 
         // Act
         dishUseCase.updateDish(100L, updateDish);
 
         // Assert
-        verify(dishPersistencePort, times(1)).findById(100L);
-        verify(restaurantPersistencePort, times(1)).validateRestaurantOwnership(10L, 1L);
-        verify(dishPersistencePort, times(1)).saveDish(existingDish);
+        verify(dishPersistencePort).findById(100L);
+        verify(dishPersistencePort).getUserId(); // ✅ ahora esto también ocurre
+        verify(restaurantPersistencePort).validateRestaurantOwnership(10L, 1L);
+        verify(dishPersistencePort).saveDish(existingDish);
 
         assert existingDish.getPrice().equals(new BigDecimal("25000"));
         assert existingDish.getDescription().equals("New updated description");
     }
+
+
+    @Test
+    void saveDish_ShouldValidateAndCheckOwnershipBeforeSave() {
+        // Arrange
+        when(dishPersistencePort.getUserId()).thenReturn(99L);
+
+        // Act
+        dishUseCase.saveDish(dishModel);
+
+        // Assert
+        verify(dishRulesValidation, times(1)).validateDishData(dishModel);
+        verify(categoryPersistencePort, times(1)).existCategory(1L);
+        verify(restaurantPersistencePort, times(1)).validateExist(10L);
+        verify(dishPersistencePort, times(1)).getUserId();
+        verify(restaurantPersistencePort, times(1)).validateRestaurantOwnership(10L, 99L);
+        verify(dishPersistencePort, times(1)).saveDish(dishModel);
+    }
+
+    @Test
+    void updateDish_ShouldThrowException_WhenDishNotFound() {
+        // Arrange
+        when(dishPersistencePort.findById(999L)).thenReturn(null);
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () -> dishUseCase.updateDish(999L, dishModel));
+
+        verify(dishPersistencePort, times(1)).findById(999L);
+        // El resto no se debería ejecutar
+        verify(restaurantPersistencePort, never()).validateRestaurantOwnership(any(), any());
+        verify(dishPersistencePort, never()).saveDish(any());
+    }
+
+    @Test
+    void updateDish_ShouldValidateOwnershipWithFetchedUserId() {
+        // Arrange
+        DishModel existingDish = new DishModel();
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(10L);
+        existingDish.setRestaurant(restaurant);
+
+        existingDish.setPrice(new BigDecimal("10000"));
+        existingDish.setDescription("Old");
+
+        when(dishPersistencePort.findById(100L)).thenReturn(existingDish);
+        when(dishPersistencePort.getUserId()).thenReturn(77L);
+
+        DishModel updated = new DishModel();
+        updated.setPrice(new BigDecimal("30000"));
+        updated.setDescription("Updated desc");
+
+        // Act
+        dishUseCase.updateDish(100L, updated);
+
+        // Assert
+        verify(dishPersistencePort).findById(100L);
+        verify(dishPersistencePort).getUserId();
+        verify(restaurantPersistencePort).validateRestaurantOwnership(10L, 77L);
+        verify(dishPersistencePort).saveDish(existingDish);
+
+        assert existingDish.getPrice().equals(updated.getPrice());
+        assert existingDish.getDescription().equals(updated.getDescription());
+    }
+
 
 }

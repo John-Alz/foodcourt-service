@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.infrastructure.security.config;
 
+import com.microservice.foodcourt.infrastructure.security.CustomAccessDeniedHandler;
 import com.microservice.foodcourt.infrastructure.security.JwtAuthFilter;
 import com.microservice.foodcourt.infrastructure.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtUtils jwtUtils;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, CorsConfigurationSource corsConfigurationSource) throws Exception {
@@ -33,6 +35,8 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAuthFilter(jwtUtils), BasicAuthenticationFilter.class)
+                .exceptionHandling(exception ->
+                        exception.accessDeniedHandler(customAccessDeniedHandler))
                 .build();
     }
 

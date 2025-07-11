@@ -7,5 +7,7 @@ public interface IDishPersistencePort {
     void saveDish(DishModel dishModel);
     DishModel findById(Long id);
 
+    Long getUserId();
+
 
 }
