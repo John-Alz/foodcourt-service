@@ -24,4 +24,11 @@ public class RestaurantHandler implements IRestaurantHandler {
         restaurantServicePort.saveRestaurant(restaurantMapper.requestToModel(restaurantRequestDto));
         return new SaveMessageResponse("Restaurante creado.", LocalDateTime.now());
     }
+
+    @Override
+    public void validateRestaurantOwnership(Long restaurantId, Long ownerId) {
+        restaurantServicePort.validateRestaurantOwnership(restaurantId, ownerId);
+    }
+
+
 }

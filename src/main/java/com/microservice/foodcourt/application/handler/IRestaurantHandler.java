@@ -7,4 +7,6 @@ public interface IRestaurantHandler {
 
     SaveMessageResponse saveRestaurant(RestaurantRequestDto restaurantRequestDto);
 
+    void validateRestaurantOwnership(Long restaurantId, Long ownerId);
+
 }
