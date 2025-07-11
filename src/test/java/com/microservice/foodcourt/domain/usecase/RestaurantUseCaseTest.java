@@ -33,4 +33,14 @@ class RestaurantUseCaseTest {
         verify(restaurantPersistencePort, times(1)).saveRestaurant(restaurantModel);
         verifyNoMoreInteractions(restaurantRulesValidator, restaurantPersistencePort);
     }
+
+    @Test
+    void validateRestaurantOwnership() {
+        Long restaurantId = 2L;
+        Long userId = 12L;
+
+        restaurantUseCase.validateRestaurantOwnership(restaurantId, userId);
+
+        verify(restaurantPersistencePort, times(1)).validateRestaurantOwnership(restaurantId, userId);
+    }
 }
