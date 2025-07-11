@@ -13,5 +13,6 @@ import org.mapstruct.ReportingPolicy;
 public interface IDishEntityMapper {
 
     DishEntity toEntity(DishModel dishModel);
+    DishModel toModel(DishEntity dishEntity);
 
 }

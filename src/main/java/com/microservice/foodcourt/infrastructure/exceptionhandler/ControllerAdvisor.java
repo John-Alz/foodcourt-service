@@ -3,6 +3,7 @@ package com.microservice.foodcourt.infrastructure.exceptionhandler;
 import com.microservice.foodcourt.domain.exception.InvalidFieldException;
 import com.microservice.foodcourt.domain.exception.RequiredFieldException;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
+import com.microservice.foodcourt.infrastructure.exception.UnauthorizedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,6 +26,11 @@ public class ControllerAdvisor {
     @ExceptionHandler(NoDataFoundException.class)
     public ResponseEntity<ExceptionRespnse> handleNoDataFoundException(NoDataFoundException e) {
         return ResponseEntity.badRequest().body(new ExceptionRespnse(e.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ExceptionRespnse> handleUnauthorizedException(UnauthorizedException e) {
+        return ResponseEntity.badRequest().body(new ExceptionRespnse("Acción no permitida: el restaurante no es de tu propiedad.", LocalDateTime.now()));
     }
 
 }

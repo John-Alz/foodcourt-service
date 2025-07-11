@@ -26,6 +26,20 @@ public class DishUseCase implements IDishServicePort {
         dishRulesValidation.validateDishData(dishModel);
         categoryPersistencePort.existCategory(dishModel.getCategory().getId());
         restaurantPersistencePort.validateExist(dishModel.getRestaurant().getId());
+        Long userId = dishPersistencePort.getUserId();
+        restaurantPersistencePort.validateRestaurantOwnership(dishModel.getRestaurant().getId(), userId);
         dishPersistencePort.saveDish(dishModel);
+    }
+
+    @Override
+    public void updateDish(Long id, DishModel updateDishModel) {
+        DishModel dishFound = dishPersistencePort.findById(id);
+        Long restaurantId = dishFound.getRestaurant().getId();
+        Long getUserId = dishPersistencePort.getUserId();
+        restaurantPersistencePort.validateRestaurantOwnership(restaurantId, getUserId);
+
+        dishFound.setPrice(updateDishModel.getPrice());
+        dishFound.setDescription(updateDishModel.getDescription());
+        dishPersistencePort.saveDish(dishFound);
     }
 }

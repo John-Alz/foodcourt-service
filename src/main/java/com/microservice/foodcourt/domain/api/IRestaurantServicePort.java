@@ -6,4 +6,5 @@ public interface IRestaurantServicePort {
 
     void saveRestaurant(RestaurantModel restaurantModel);
 
+
 }
