@@ -20,4 +20,11 @@ public class RestaurantUseCase implements IRestaurantServicePort {
         restaurantRulesValidator.validateRestaurantData(restaurantModel);
         restaurantPersistencePort.saveRestaurant(restaurantModel);
     }
+
+    @Override
+    public void validateRestaurantOwnership(Long restaurantId, Long userId) {
+        restaurantPersistencePort.validateRestaurantOwnership(restaurantId, userId);
+    }
+
+
 }

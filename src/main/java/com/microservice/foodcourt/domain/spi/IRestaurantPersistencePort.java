@@ -7,4 +7,5 @@ public interface IRestaurantPersistencePort {
     void saveRestaurant(RestaurantModel restaurantModel);
     void validateExist(Long id);
     void validateRestaurantOwnership(Long restaurantId, Long userId);
+
 }

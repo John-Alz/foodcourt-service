@@ -40,4 +40,5 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
             throw new UnauthorizedException();
         }
     }
+
 }

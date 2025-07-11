@@ -6,5 +6,8 @@ public interface IRestaurantServicePort {
 
     void saveRestaurant(RestaurantModel restaurantModel);
 
+    void validateRestaurantOwnership(Long restaurantId, Long userId);
+
+
 
 }

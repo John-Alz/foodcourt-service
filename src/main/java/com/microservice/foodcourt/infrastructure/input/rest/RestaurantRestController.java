@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/restaurant")
@@ -34,6 +31,12 @@ public class RestaurantRestController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     public ResponseEntity<SaveMessageResponse> saveRestaurant(@RequestBody RestaurantRequestDto restaurantRequestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(restaurantHandler.saveRestaurant(restaurantRequestDto));
+    }
+
+    @GetMapping("/{restaurantId}/belongs-to/{ownerId}")
+    public ResponseEntity<Void> isOwnerOfRestaurant(@PathVariable Long restaurantId, @PathVariable Long ownerId) {
+        restaurantHandler.validateRestaurantOwnership(restaurantId, ownerId);
+        return ResponseEntity.ok().build();
     }
 
 }
