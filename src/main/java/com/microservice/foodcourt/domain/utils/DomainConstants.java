@@ -7,6 +7,8 @@ public class DomainConstants {
     public static final String REGEX_PHONE_NUMBER = "^\\+?[0-9]{1,13}$";
     public static final String REGEX_ONLY_NUMBER = "^[0-9]+$";
     public static final String REGEX_NAME = "^(?!\\d+$).+$";
+    public static final int PAGE_MIN = 0;
+    public static final int SIZE_MIN = 0;
 
 
     public static final String REQUIRED_NAME = "El nombre es requerido.";
@@ -26,5 +28,9 @@ public class DomainConstants {
     public static final String REQUIRED_URLIMAGE = "La imagen es requerida.";
     public static final String REQUIRED_CATEGORY = "El id de categoria es requerido.";
     public static final String REQUIRED_RESTAURANT = "El id de restaurante es requerido.";
+
+    //Exception constants
+    public static final String INVALID_PAGE = "La pagina no puede ser menor a cero.";
+    public static final String INVALID_SIZE = "El tamaño de la pagina no puede ser menor a cero.";
 
 }

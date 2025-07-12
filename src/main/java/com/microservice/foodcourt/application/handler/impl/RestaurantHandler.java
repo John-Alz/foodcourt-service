@@ -1,10 +1,12 @@
 package com.microservice.foodcourt.application.handler.impl;
 
 import com.microservice.foodcourt.application.dto.request.RestaurantRequestDto;
+import com.microservice.foodcourt.application.dto.response.RestaurantResponseDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
 import com.microservice.foodcourt.application.handler.IRestaurantHandler;
 import com.microservice.foodcourt.application.mapper.IRestaurantMapper;
 import com.microservice.foodcourt.domain.api.IRestaurantServicePort;
+import com.microservice.foodcourt.domain.model.PageResult;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,11 @@ public class RestaurantHandler implements IRestaurantHandler {
     @Override
     public void validateRestaurantOwnership(Long restaurantId, Long ownerId) {
         restaurantServicePort.validateRestaurantOwnership(restaurantId, ownerId);
+    }
+
+    @Override
+    public PageResult<RestaurantResponseDto> getRestaurants(Integer page, Integer size) {
+        return restaurantMapper.modelListToResponseList(restaurantServicePort.getRestaurants(page, size));
     }
 
 

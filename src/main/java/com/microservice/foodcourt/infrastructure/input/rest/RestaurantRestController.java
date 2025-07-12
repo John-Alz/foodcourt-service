@@ -1,8 +1,10 @@
 package com.microservice.foodcourt.infrastructure.input.rest;
 
 import com.microservice.foodcourt.application.dto.request.RestaurantRequestDto;
+import com.microservice.foodcourt.application.dto.response.RestaurantResponseDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
 import com.microservice.foodcourt.application.handler.IRestaurantHandler;
+import com.microservice.foodcourt.domain.model.PageResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,6 +39,12 @@ public class RestaurantRestController {
     public ResponseEntity<Void> isOwnerOfRestaurant(@PathVariable Long restaurantId, @PathVariable Long ownerId) {
         restaurantHandler.validateRestaurantOwnership(restaurantId, ownerId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResult<RestaurantResponseDto>> getRestaurants(Integer page, Integer size) {
+        PageResult<RestaurantResponseDto> restaurantResponseDtoPageResult = restaurantHandler.getRestaurants(page, size);
+        return ResponseEntity.ok(restaurantResponseDtoPageResult);
     }
 
 }
