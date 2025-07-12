@@ -1,6 +1,7 @@
 package com.microservice.foodcourt.infrastructure.out.jpa.adapter;
 
 import com.microservice.foodcourt.domain.model.DishModel;
+import com.microservice.foodcourt.domain.model.PageResult;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.infrastructure.dto.AuthInfo;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
@@ -8,8 +9,13 @@ import com.microservice.foodcourt.infrastructure.out.jpa.entity.DishEntity;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IDishEntityMapper;
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IDishRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class DishJpaAdapter implements IDishPersistencePort {
@@ -37,5 +43,20 @@ public class DishJpaAdapter implements IDishPersistencePort {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AuthInfo authInfo = (AuthInfo) authentication.getPrincipal();
         return authInfo.id();
+    }
+
+    @Override
+    public PageResult<DishModel> getDishes(Integer page, Integer size, Long restaurantId, Long categoryId) {
+
+        Pageable paging = PageRequest.of(page, size);
+        Page<DishEntity> dishPage = dishRepository.findByRestaurantAndOptionalCategory(restaurantId, categoryId, paging);
+        List<DishModel> dishList = dishEntityMapper.entityListToModelList(dishPage.getContent());
+        return new PageResult<>(
+                dishList,
+                dishPage.getNumber(),
+                dishPage.getSize(),
+                dishPage.getTotalPages(),
+                dishPage.getTotalElements()
+        );
     }
 }
