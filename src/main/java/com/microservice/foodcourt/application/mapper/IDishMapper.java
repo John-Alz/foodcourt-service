@@ -2,7 +2,9 @@ package com.microservice.foodcourt.application.mapper;
 
 import com.microservice.foodcourt.application.dto.request.DishRequestDto;
 import com.microservice.foodcourt.application.dto.request.DishUpdateRequestDto;
+import com.microservice.foodcourt.application.dto.response.DishResponseDto;
 import com.microservice.foodcourt.domain.model.DishModel;
+import com.microservice.foodcourt.domain.model.PageResult;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -26,5 +28,8 @@ public interface IDishMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "id", ignore = true)
     DishModel updateRequestToModel(DishUpdateRequestDto dishUpdateRequestDto);
+
+    PageResult<DishResponseDto> modelListToResponseList(PageResult<DishModel> dishModelList);
+
 
 }

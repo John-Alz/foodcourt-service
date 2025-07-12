@@ -1,10 +1,13 @@
 package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.api.IDishServicePort;
+import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
 import com.microservice.foodcourt.domain.model.DishModel;
+import com.microservice.foodcourt.domain.model.PageResult;
 import com.microservice.foodcourt.domain.spi.ICategoryPersistencePort;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
+import com.microservice.foodcourt.domain.utils.DomainConstants;
 import com.microservice.foodcourt.domain.validation.DishRulesValidation;
 
 public class DishUseCase implements IDishServicePort {
@@ -50,6 +53,17 @@ public class DishUseCase implements IDishServicePort {
         restaurantPersistencePort.validateRestaurantOwnership(dishFound.getRestaurant().getId(), userId);
         dishFound.setActive(status);
         dishPersistencePort.saveDish(dishFound);
+    }
+
+    @Override
+    public PageResult<DishModel> getDishes(Integer page, Integer size, Long restaurantId, Long categoryId) {
+        if(page < DomainConstants.PAGE_MIN) throw new InvalidPaginationParameterException(DomainConstants.INVALID_PAGE);
+        if(size < DomainConstants.SIZE_MIN) throw new InvalidPaginationParameterException(DomainConstants.INVALID_SIZE);
+        restaurantPersistencePort.validateExist(restaurantId);
+        if (categoryId != null) {
+            categoryPersistencePort.existCategory(categoryId);
+        }
+        return dishPersistencePort.getDishes(page, size, restaurantId, categoryId);
     }
 
 }
