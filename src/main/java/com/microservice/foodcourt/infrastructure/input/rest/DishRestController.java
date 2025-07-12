@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.infrastructure.input.rest;
 
+import com.microservice.foodcourt.application.dto.request.DishChangeStatusDto;
 import com.microservice.foodcourt.application.dto.request.DishRequestDto;
 import com.microservice.foodcourt.application.dto.request.DishUpdateRequestDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
@@ -43,6 +44,12 @@ public class DishRestController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<SaveMessageResponse> updateDish(@PathVariable Long id, @RequestBody DishUpdateRequestDto dishUpdateRequestDto) {
         return ResponseEntity.status(HttpStatus.OK).body(dishHandler.updateDish(id, dishUpdateRequestDto));
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<SaveMessageResponse> changeDishStatus(@PathVariable Long id, @RequestBody DishChangeStatusDto dishChangeStatusDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(dishHandler.changeDishStatus(id, dishChangeStatusDto));
     }
 
 

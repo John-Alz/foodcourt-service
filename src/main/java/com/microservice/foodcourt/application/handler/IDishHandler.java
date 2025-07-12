@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.application.handler;
 
+import com.microservice.foodcourt.application.dto.request.DishChangeStatusDto;
 import com.microservice.foodcourt.application.dto.request.DishRequestDto;
 import com.microservice.foodcourt.application.dto.request.DishUpdateRequestDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
@@ -8,5 +9,6 @@ public interface IDishHandler {
 
     SaveMessageResponse saveDish(DishRequestDto dishRequestDto);
     SaveMessageResponse updateDish(Long id, DishUpdateRequestDto dishUpdateRequestDto);
+    SaveMessageResponse changeDishStatus(Long id, DishChangeStatusDto dishChangeStatusDto);
 
 }
