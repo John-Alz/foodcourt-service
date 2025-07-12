@@ -42,4 +42,14 @@ public class DishUseCase implements IDishServicePort {
         dishFound.setDescription(updateDishModel.getDescription());
         dishPersistencePort.saveDish(dishFound);
     }
+
+    @Override
+    public void changeDishStatus(Long id, boolean status) {
+        DishModel dishFound = dishPersistencePort.findById(id);
+        Long userId = dishPersistencePort.getUserId();
+        restaurantPersistencePort.validateRestaurantOwnership(dishFound.getRestaurant().getId(), userId);
+        dishFound.setActive(status);
+        dishPersistencePort.saveDish(dishFound);
+    }
+
 }

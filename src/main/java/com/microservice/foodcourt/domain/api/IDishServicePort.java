@@ -6,6 +6,7 @@ public interface IDishServicePort {
 
     void saveDish(DishModel dishModel);
     void updateDish(Long id, DishModel updateDishModel);
+    void changeDishStatus(Long id,boolean status);
 
 
 }
