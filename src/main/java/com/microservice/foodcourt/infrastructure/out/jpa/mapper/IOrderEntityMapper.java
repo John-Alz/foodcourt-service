@@ -11,6 +11,7 @@ import java.util.List;
 
 @Mapper(
         componentModel = "spring",
+        uses = { IDishOrderEntityMapper.class },
         unmappedSourcePolicy = ReportingPolicy.IGNORE,
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
@@ -18,6 +19,10 @@ public interface IOrderEntityMapper {
 
     OrderEntity toEntity(OrderModel orderModel);
 
+    OrderStatusEntity toOrderStatusEntity(OrderStatusModel orderStatusModel);
+
     List<OrderStatusEntity> toOrderStatusList(List<OrderStatusModel> orderStatusModels);
+
+    List<OrderModel> listEntityToListModel(List<OrderEntity> orderEntities);
 
 }

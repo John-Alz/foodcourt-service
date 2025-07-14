@@ -3,6 +3,8 @@ package com.microservice.foodcourt.domain.usecase;
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
+import com.microservice.foodcourt.domain.model.PageResult;
+import com.microservice.foodcourt.domain.model.RestaurantModel;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
@@ -47,5 +49,13 @@ public class OrderUseCase implements IOrderServicePort  {
         }
         dishPersistencePort.validateAllDishesBelongToRestaurant(dishesId, orderModel.getRestaurant().getId());
         orderPersistencePort.saveOrder(orderModel);
+    }
+
+    @Override
+    public PageResult<OrderModel> getOrders(Integer page, Integer size, OrderStatusModel status) {
+        Long employeeId = userSessionPort.getUserId();
+        Long restaurantIdByEmployee = restaurantPersistencePort.getRestaurantByEmployee(employeeId);
+        restaurantPersistencePort.validateExist(restaurantIdByEmployee);
+        return orderPersistencePort.getOrders(page, size, restaurantIdByEmployee, status);
     }
 }
