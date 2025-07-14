@@ -11,4 +11,6 @@ public interface IOrderHandler {
     SaveMessageResponse saveOrder(OrderRequestDto orderRequestDto);
     PageResult<OrderResponseDto> getOrders(Integer page, Integer size, OrderStatusModel status);
 
+    SaveMessageResponse startOrderPreparation(Long orderId);
+
 }

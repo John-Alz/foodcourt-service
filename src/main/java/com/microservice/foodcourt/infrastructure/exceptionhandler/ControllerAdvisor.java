@@ -1,8 +1,6 @@
 package com.microservice.foodcourt.infrastructure.exceptionhandler;
 
-import com.microservice.foodcourt.domain.exception.InvalidFieldException;
-import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
-import com.microservice.foodcourt.domain.exception.RequiredFieldException;
+import com.microservice.foodcourt.domain.exception.*;
 import com.microservice.foodcourt.infrastructure.exception.CustomerHasOngoingOrderException;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
 import com.microservice.foodcourt.infrastructure.exception.UnauthorizedException;
@@ -43,6 +41,16 @@ public class ControllerAdvisor {
     @ExceptionHandler(CustomerHasOngoingOrderException.class)
     public ResponseEntity<ExceptionRespnse> handleCustomerHasOngoingOrderException(CustomerHasOngoingOrderException e) {
         return ResponseEntity.badRequest().body(new ExceptionRespnse("Ya existe un pedido activo para este cliente. Espere a que finalice para crear uno nuevo.", LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(DataFoundException.class)
+    public ResponseEntity<ExceptionRespnse> handleDataFoundException(DataFoundException e) {
+        return ResponseEntity.badRequest().body(new ExceptionRespnse(e.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<ExceptionRespnse> handleUnauthorizedActionException(UnauthorizedActionException e) {
+        return ResponseEntity.badRequest().body(new ExceptionRespnse("No puedes asignarte platos de otro restaurante.", LocalDateTime.now()));
     }
 
 }

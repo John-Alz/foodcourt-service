@@ -32,4 +32,10 @@ public class OrderHandler implements IOrderHandler {
     public PageResult<OrderResponseDto> getOrders(Integer page, Integer size, OrderStatusModel status) {
         return orderMapper.modelListToResponseList(orderServicePort.getOrders(page, size, status));
     }
+
+    @Override
+    public SaveMessageResponse startOrderPreparation(Long orderId) {
+        orderServicePort.startOrderPreparation(orderId);
+        return new SaveMessageResponse("El pedido esta en preparacion", LocalDateTime.now());
+    }
 }

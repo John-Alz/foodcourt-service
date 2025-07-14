@@ -14,5 +14,11 @@ public interface IOrderPersistencePort {
 
     PageResult<OrderModel> getOrders(Integer page, Integer size, Long restaurantId, OrderStatusModel status);
 
+    OrderModel getOrderById(Long orderId);
+
+    void updateOrder(OrderModel orderModel);
+
+    boolean isOrderAlreadyAssignedToEmployee(Long employeId, Long orderId);
+
 
 }

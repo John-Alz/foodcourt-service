@@ -6,6 +6,7 @@ import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
 import com.microservice.foodcourt.domain.spi.IUserSessionPort;
+import com.microservice.foodcourt.domain.validation.OrderUpdateRulesValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -34,6 +35,9 @@ class OrderUseCaseTest {
 
     @Mock
     private IUserSessionPort userSessionPort;
+
+    @Mock
+    private OrderUpdateRulesValidation orderUpdateRulesValidation;
 
     @InjectMocks
     private OrderUseCase orderUseCase;
@@ -164,4 +168,36 @@ class OrderUseCaseTest {
         verify(orderPersistencePort, never()).getOrders(anyInt(), anyInt(), anyLong(), any());
 
     }
+
+    @Test
+    void startOrderPreparation_ShouldUpdateOrder_WhenValidationPasses() {
+        Long chefId = 100L;
+        Long orderId = 200L;
+        Long restaurantId = 300L;
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantId);
+
+        OrderModel order = new OrderModel();
+        order.setId(orderId);
+        order.setRestaurant(restaurant);
+        order.setStatus(OrderStatusModel.PENDIENTE);
+        order.setChefId(null);
+
+        when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(orderPersistencePort.isOrderAlreadyAssignedToEmployee(chefId, orderId)).thenReturn(false);
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
+        when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantId);
+
+        // No exception expected
+        orderUseCase.startOrderPreparation(orderId);
+
+        assertEquals(chefId, order.getChefId());
+        assertEquals(OrderStatusModel.PREPARACION, order.getStatus());
+
+        verify(orderUpdateRulesValidation).validateDataUpdate(false, null, restaurantId, restaurantId);
+        verify(orderPersistencePort).updateOrder(order);
+    }
+
+
 }
