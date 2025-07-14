@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.domain.usecase;
 
+import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
 import com.microservice.foodcourt.domain.model.*;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
@@ -12,9 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @org.junit.jupiter.api.extension.ExtendWith(MockitoExtension.class)
@@ -91,18 +94,74 @@ class OrderUseCaseTest {
 
     @Test
     void saveOrder_ShouldValidateOrderStatusCheckBeforeSaving() {
-        // Arrange
+
         when(userSessionPort.getUserId()).thenReturn(42L);
         when(dishPersistencePort.findById(anyLong())).thenReturn(new DishModel());
 
-        // Act
+
         orderUseCase.saveOrder(orderModel);
 
-        // Assert
+
         verify(orderPersistencePort, times(1)).existsOrderInProcessByCustomerId(eq(42L), argThat(statusList ->
                 statusList.contains(OrderStatusModel.PENDIENTE) &&
                         statusList.contains(OrderStatusModel.PREPARACION) &&
                         statusList.contains(OrderStatusModel.LISTO)
         ));
+    }
+
+    @Test
+    void getOrders_shouldReturnListOfRestaurants() {
+        OrderModel orderModel1 = new OrderModel();
+        OrderModel orderModel2 = new OrderModel();
+        List<OrderModel> ordersMock = Arrays.asList(
+                orderModel1,
+                orderModel2
+        );
+
+        PageResult pageResultMock = new PageResult<>(
+                ordersMock,
+                0,
+                2,
+                4,
+                8L
+        );
+
+        when(orderPersistencePort.getOrders(0, 2, 10L, OrderStatusModel.PENDIENTE)).thenReturn(pageResultMock);
+        when(userSessionPort.getUserId()).thenReturn(10L);
+        when(restaurantPersistencePort.getRestaurantByEmployee(10L)).thenReturn(10L);
+
+        PageResult<OrderModel> result = orderUseCase.getOrders(0, 2, OrderStatusModel.PENDIENTE);
+
+        assertNotNull(result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(0, result.getPage());
+        assertEquals(2, result.getSize());
+        assertEquals(4, result.getTotalPages());
+        assertEquals(8L, result.getTotalElements());
+        verify(orderPersistencePort, times(1)).getOrders(0, 2, 10L, OrderStatusModel.PENDIENTE);
+        verify(userSessionPort, times(1)).getUserId();
+        verify(restaurantPersistencePort, times(1)).getRestaurantByEmployee(10L);
+    }
+
+    @Test
+    void getOrders_shouldThrowException_WhenPageIsInvalid() {
+
+        assertThrows(InvalidPaginationParameterException.class, () -> {
+            orderUseCase.getOrders(-2, 2, OrderStatusModel.PENDIENTE);
+        });
+
+        verify(orderPersistencePort, never()).getOrders(anyInt(), anyInt(), anyLong(), any());
+
+    }
+
+    @Test
+    void getOrders_shouldThrowException_WhenSizeIsInvalid() {
+
+        assertThrows(InvalidPaginationParameterException.class, () -> {
+            orderUseCase.getOrders(2, -2, OrderStatusModel.PENDIENTE);
+        });
+
+        verify(orderPersistencePort, never()).getOrders(anyInt(), anyInt(), anyLong(), any());
+
     }
 }
