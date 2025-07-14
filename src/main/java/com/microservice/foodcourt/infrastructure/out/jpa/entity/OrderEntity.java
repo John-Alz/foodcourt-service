@@ -23,6 +23,8 @@ public class OrderEntity {
     private Long id;
     private Long customerId;
     private LocalDateTime date;
+
+    @Enumerated(EnumType.STRING)
     private OrderStatusEntity status;
     private Long chefId;
 
