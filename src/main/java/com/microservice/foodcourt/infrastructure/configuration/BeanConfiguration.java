@@ -3,20 +3,14 @@ package com.microservice.foodcourt.infrastructure.configuration;
 import com.microservice.foodcourt.domain.api.IDishServicePort;
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
 import com.microservice.foodcourt.domain.api.IRestaurantServicePort;
-import com.microservice.foodcourt.domain.spi.ICategoryPersistencePort;
-import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
-import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
-import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
+import com.microservice.foodcourt.domain.spi.*;
 import com.microservice.foodcourt.domain.usecase.DishUseCase;
 import com.microservice.foodcourt.domain.usecase.OrderUseCase;
 import com.microservice.foodcourt.domain.usecase.RestaurantUseCase;
 import com.microservice.foodcourt.domain.validation.DishRulesValidation;
 import com.microservice.foodcourt.domain.validation.RestaurantRulesValidator;
 import com.microservice.foodcourt.infrastructure.clients.UserClient;
-import com.microservice.foodcourt.infrastructure.out.jpa.adapter.CategoryJpaAdapter;
-import com.microservice.foodcourt.infrastructure.out.jpa.adapter.DishJpaAdapter;
-import com.microservice.foodcourt.infrastructure.out.jpa.adapter.OrderJpaMapper;
-import com.microservice.foodcourt.infrastructure.out.jpa.adapter.RestaurantJpaAdapter;
+import com.microservice.foodcourt.infrastructure.out.jpa.adapter.*;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IDishEntityMapper;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IOrderEntityMapper;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
@@ -66,7 +60,7 @@ public class BeanConfiguration {
 
     @Bean
     public IDishServicePort dishServicePort(IRestaurantPersistencePort restaurantPersistencePort) {
-        return new DishUseCase(dishPersistencePort(), categoryPersistencePort(), restaurantPersistencePort(), dishRulesValidation());
+        return new DishUseCase(dishPersistencePort(), categoryPersistencePort(), restaurantPersistencePort(),userSessionPort(), dishRulesValidation());
     }
 
     @Bean
@@ -86,7 +80,12 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderServicePort orderServicePort() {
-        return new OrderUseCase(orderPersistencePort(), restaurantPersistencePort());
+        return new OrderUseCase(orderPersistencePort(), restaurantPersistencePort(), dishPersistencePort(), userSessionPort());
+    }
+
+    @Bean
+    public IUserSessionPort userSessionPort() {
+        return new UserSessionJpaAdapter();
     }
 
 }

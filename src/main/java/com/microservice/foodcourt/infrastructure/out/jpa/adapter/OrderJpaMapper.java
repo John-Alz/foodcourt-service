@@ -2,7 +2,9 @@ package com.microservice.foodcourt.infrastructure.out.jpa.adapter;
 
 import com.microservice.foodcourt.domain.model.DishOrderModel;
 import com.microservice.foodcourt.domain.model.OrderModel;
+import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
+import com.microservice.foodcourt.infrastructure.exception.CustomerHasOngoingOrderException;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
 import com.microservice.foodcourt.infrastructure.out.jpa.entity.*;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IOrderEntityMapper;
@@ -43,4 +45,13 @@ public class OrderJpaMapper implements IOrderPersistencePort {
         orderEntity.setDishes(dishOrders);
         orderRepository.save(orderEntity);
     }
+
+    @Override
+    public void existsOrderInProcessByCustomerId(Long customerId, List<OrderStatusModel> status) {
+        List<OrderStatusEntity> orderStatusEntities = orderEntityMapper.toOrderStatusList(status);
+        if (orderRepository.existsByCustomerIdAndStatuses(customerId, orderStatusEntities)) {
+            throw new CustomerHasOngoingOrderException();
+        }
+    }
+
 }

@@ -1,9 +1,13 @@
 package com.microservice.foodcourt.infrastructure.out.jpa.mapper;
 
 import com.microservice.foodcourt.domain.model.OrderModel;
+import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.infrastructure.out.jpa.entity.OrderEntity;
+import com.microservice.foodcourt.infrastructure.out.jpa.entity.OrderStatusEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
+
+import java.util.List;
 
 @Mapper(
         componentModel = "spring",
@@ -13,5 +17,7 @@ import org.mapstruct.ReportingPolicy;
 public interface IOrderEntityMapper {
 
     OrderEntity toEntity(OrderModel orderModel);
+
+    List<OrderStatusEntity> toOrderStatusList(List<OrderStatusModel> orderStatusModels);
 
 }

@@ -3,6 +3,7 @@ package com.microservice.foodcourt.infrastructure.exceptionhandler;
 import com.microservice.foodcourt.domain.exception.InvalidFieldException;
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
 import com.microservice.foodcourt.domain.exception.RequiredFieldException;
+import com.microservice.foodcourt.infrastructure.exception.CustomerHasOngoingOrderException;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
 import com.microservice.foodcourt.infrastructure.exception.UnauthorizedException;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,11 @@ public class ControllerAdvisor {
     @ExceptionHandler(InvalidPaginationParameterException.class)
     public ResponseEntity<ExceptionRespnse> handleInvalidPaginationParameterException(InvalidPaginationParameterException e) {
         return ResponseEntity.badRequest().body(new ExceptionRespnse(e.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(CustomerHasOngoingOrderException.class)
+    public ResponseEntity<ExceptionRespnse> handleCustomerHasOngoingOrderException(CustomerHasOngoingOrderException e) {
+        return ResponseEntity.badRequest().body(new ExceptionRespnse("Ya existe un pedido activo para este cliente. Espere a que finalice para crear uno nuevo.", LocalDateTime.now()));
     }
 
 }
