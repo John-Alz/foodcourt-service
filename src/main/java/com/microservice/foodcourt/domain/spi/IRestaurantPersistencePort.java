@@ -10,4 +10,6 @@ public interface IRestaurantPersistencePort {
     void validateRestaurantOwnership(Long restaurantId, Long userId);
     PageResult<RestaurantModel> getRestaurants(Integer page, Integer size);
 
+    Long getRestaurantByEmployee(Long employeeId);
+
 }

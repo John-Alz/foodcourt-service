@@ -1,12 +1,15 @@
 package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
+import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
+import com.microservice.foodcourt.domain.model.PageResult;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
 import com.microservice.foodcourt.domain.spi.IUserSessionPort;
+import com.microservice.foodcourt.domain.utils.DomainConstants;
 
 import java.util.List;
 
@@ -47,5 +50,15 @@ public class OrderUseCase implements IOrderServicePort  {
         }
         dishPersistencePort.validateAllDishesBelongToRestaurant(dishesId, orderModel.getRestaurant().getId());
         orderPersistencePort.saveOrder(orderModel);
+    }
+
+    @Override
+    public PageResult<OrderModel> getOrders(Integer page, Integer size, OrderStatusModel status) {
+        if (page < DomainConstants.PAGE_MIN) throw new InvalidPaginationParameterException(DomainConstants.INVALID_PAGE);
+        if (size < DomainConstants.SIZE_MIN) throw new InvalidPaginationParameterException(DomainConstants.INVALID_SIZE);
+        Long employeeId = userSessionPort.getUserId();
+        Long restaurantIdByEmployee = restaurantPersistencePort.getRestaurantByEmployee(employeeId);
+        restaurantPersistencePort.validateExist(restaurantIdByEmployee);
+        return orderPersistencePort.getOrders(page, size, restaurantIdByEmployee, status);
     }
 }

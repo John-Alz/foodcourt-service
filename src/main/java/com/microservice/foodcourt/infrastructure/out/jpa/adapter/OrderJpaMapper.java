@@ -3,6 +3,7 @@ package com.microservice.foodcourt.infrastructure.out.jpa.adapter;
 import com.microservice.foodcourt.domain.model.DishOrderModel;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
+import com.microservice.foodcourt.domain.model.PageResult;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
 import com.microservice.foodcourt.infrastructure.exception.CustomerHasOngoingOrderException;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
@@ -12,6 +13,9 @@ import com.microservice.foodcourt.infrastructure.out.jpa.repository.IDishReposit
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IOrderRepository;
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +56,20 @@ public class OrderJpaMapper implements IOrderPersistencePort {
         if (orderRepository.existsByCustomerIdAndStatuses(customerId, orderStatusEntities)) {
             throw new CustomerHasOngoingOrderException();
         }
+    }
+
+    @Override
+    public PageResult<OrderModel> getOrders(Integer page, Integer size, Long restaurantId, OrderStatusModel status) {
+        Pageable paging = PageRequest.of(page, size);
+        Page<OrderEntity> orderPage = orderRepository.findAllByRestaurant(restaurantId, orderEntityMapper.toOrderStatusEntity(status), paging);
+        List<OrderModel> orderList = orderEntityMapper.listEntityToListModel(orderPage.getContent());
+        return new PageResult<>(
+                orderList,
+                orderPage.getNumber(),
+                orderPage.getSize(),
+                orderPage.getTotalPages(),
+                orderPage.getTotalElements()
+        );
     }
 
 }
