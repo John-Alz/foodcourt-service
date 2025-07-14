@@ -6,6 +6,10 @@ import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
 import com.microservice.foodcourt.application.handler.IOrderHandler;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.domain.model.PageResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +34,18 @@ public class OrderRestController {
     public ResponseEntity<PageResult<OrderResponseDto>> getOrders(Integer page, Integer size, OrderStatusModel status) {
         PageResult<OrderResponseDto> orderResponseDtoPageResult = orderHandler.getOrders(page, size, status);
         return ResponseEntity.ok(orderResponseDtoPageResult);
+    }
+
+    @Operation(summary = "Cambiar de estado de la orden.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Orden actualizada.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Error de validacion", content = @Content),
+    })
+
+    @PatchMapping("/{id}/assign")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<SaveMessageResponse> updateOrder(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderHandler.startOrderPreparation(id));
     }
 
 }

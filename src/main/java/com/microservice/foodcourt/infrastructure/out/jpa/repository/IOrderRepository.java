@@ -22,4 +22,6 @@ public interface IOrderRepository extends JpaRepository<OrderEntity, Long> {
     Page<OrderEntity> findAllByRestaurant(@Param("restaurantId") Long restaurantId, @Param("status") OrderStatusEntity status, Pageable paging);
 
 
+    @Query("SELECT COUNT(o) > 0 FROM OrderEntity o WHERE o.id = ?2 AND o.chefId = ?1")
+    boolean existsByIdAndChefId(Long chefId, Long orderId);
 }

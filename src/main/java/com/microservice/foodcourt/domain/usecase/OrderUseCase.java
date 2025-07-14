@@ -10,6 +10,7 @@ import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
 import com.microservice.foodcourt.domain.spi.IUserSessionPort;
 import com.microservice.foodcourt.domain.utils.DomainConstants;
+import com.microservice.foodcourt.domain.validation.OrderUpdateRulesValidation;
 
 import java.util.List;
 
@@ -19,15 +20,18 @@ public class OrderUseCase implements IOrderServicePort  {
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IDishPersistencePort dishPersistencePort;
     private final IUserSessionPort userSessionPort;
+    private final OrderUpdateRulesValidation orderUpdateRulesValidation;
 
     public OrderUseCase(IOrderPersistencePort orderPersistencePort, 
                         IRestaurantPersistencePort restaurantPersistencePort, 
                         IDishPersistencePort dishPersistencePort,
-                        IUserSessionPort userSessionPort) {
+                        IUserSessionPort userSessionPort,
+                        OrderUpdateRulesValidation orderUpdateRulesValidation) {
         this.orderPersistencePort = orderPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.dishPersistencePort = dishPersistencePort;
         this.userSessionPort = userSessionPort;
+        this.orderUpdateRulesValidation = orderUpdateRulesValidation;
     }
 
     @Override
@@ -61,4 +65,23 @@ public class OrderUseCase implements IOrderServicePort  {
         restaurantPersistencePort.validateExist(restaurantIdByEmployee);
         return orderPersistencePort.getOrders(page, size, restaurantIdByEmployee, status);
     }
+
+    @Override
+    public void startOrderPreparation(Long orderId) {
+        Long chefId = userSessionPort.getUserId();
+        boolean isAlreadyAssigned = orderPersistencePort.isOrderAlreadyAssignedToEmployee(chefId, orderId);
+        OrderModel orderFound = orderPersistencePort.getOrderById(orderId);
+        Long restaurantIdByEmployee = restaurantPersistencePort.getRestaurantByEmployee(chefId);
+
+        orderUpdateRulesValidation.validateDataUpdate(
+                isAlreadyAssigned,
+                orderFound.getChefId(),
+                restaurantIdByEmployee,
+                orderFound.getRestaurant().getId());
+
+        orderFound.setChefId(chefId);
+        orderFound.setStatus(OrderStatusModel.PREPARACION);
+        orderPersistencePort.updateOrder(orderFound);
+    }
+
 }

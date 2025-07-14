@@ -72,4 +72,23 @@ public class OrderJpaMapper implements IOrderPersistencePort {
         );
     }
 
+    @Override
+    public OrderModel getOrderById(Long orderId) {
+        OrderEntity orderFound = orderRepository.findById(orderId).orElse(null);
+        if (orderFound == null) throw new NoDataFoundException("No existe una orden con ese id.");
+        return orderEntityMapper.toModel(orderFound);
+    }
+
+    @Override
+    public void updateOrder(OrderModel orderModel) {
+        orderRepository.save(orderEntityMapper.toEntityWithoutDishestoEntity(orderModel));
+    }
+
+    @Override
+    public boolean isOrderAlreadyAssignedToEmployee(Long employeeId, Long orderId) {
+        return orderRepository.existsByIdAndChefId(employeeId, orderId);
+    }
+
+
+
 }
