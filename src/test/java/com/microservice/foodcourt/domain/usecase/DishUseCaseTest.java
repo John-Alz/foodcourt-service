@@ -8,6 +8,7 @@ import com.microservice.foodcourt.domain.model.RestaurantModel;
 import com.microservice.foodcourt.domain.spi.ICategoryPersistencePort;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
+import com.microservice.foodcourt.domain.spi.IUserSessionPort;
 import com.microservice.foodcourt.domain.validation.DishRulesValidation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class DishUseCaseTest {
 
     @Mock
     private IRestaurantPersistencePort restaurantPersistencePort;
+
+    @Mock
+    private IUserSessionPort userSessionPort;
 
     @Mock
     private DishRulesValidation dishRulesValidation;
@@ -92,14 +96,14 @@ class DishUseCaseTest {
         updateDish.setDescription("New updated description");
 
         when(dishPersistencePort.findById(100L)).thenReturn(existingDish);
-        when(dishPersistencePort.getUserId()).thenReturn(1L); // ✅ Esto faltaba
+        when(userSessionPort.getUserId()).thenReturn(1L); // ✅ Esto faltaba
 
 
         dishUseCase.updateDish(100L, updateDish);
 
 
         verify(dishPersistencePort).findById(100L);
-        verify(dishPersistencePort).getUserId(); // ✅ ahora esto también ocurre
+        verify(userSessionPort).getUserId(); // ✅ ahora esto también ocurre
         verify(restaurantPersistencePort).validateRestaurantOwnership(10L, 1L);
         verify(dishPersistencePort).saveDish(existingDish);
 
@@ -111,7 +115,7 @@ class DishUseCaseTest {
     @Test
     void saveDish_ShouldValidateAndCheckOwnershipBeforeSave() {
 
-        when(dishPersistencePort.getUserId()).thenReturn(99L);
+        when(userSessionPort.getUserId()).thenReturn(99L);
 
 
         dishUseCase.saveDish(dishModel);
@@ -120,7 +124,7 @@ class DishUseCaseTest {
         verify(dishRulesValidation, times(1)).validateDishData(dishModel);
         verify(categoryPersistencePort, times(1)).existCategory(1L);
         verify(restaurantPersistencePort, times(1)).validateExist(10L);
-        verify(dishPersistencePort, times(1)).getUserId();
+        verify(userSessionPort, times(1)).getUserId();
         verify(restaurantPersistencePort, times(1)).validateRestaurantOwnership(10L, 99L);
         verify(dishPersistencePort, times(1)).saveDish(dishModel);
     }
@@ -150,7 +154,7 @@ class DishUseCaseTest {
         existingDish.setDescription("Old");
 
         when(dishPersistencePort.findById(100L)).thenReturn(existingDish);
-        when(dishPersistencePort.getUserId()).thenReturn(77L);
+        when(userSessionPort.getUserId()).thenReturn(77L);
 
         DishModel updated = new DishModel();
         updated.setPrice(new BigDecimal("30000"));
@@ -161,7 +165,7 @@ class DishUseCaseTest {
 
 
         verify(dishPersistencePort).findById(100L);
-        verify(dishPersistencePort).getUserId();
+        verify(userSessionPort).getUserId();
         verify(restaurantPersistencePort).validateRestaurantOwnership(10L, 77L);
         verify(dishPersistencePort).saveDish(existingDish);
 
@@ -178,7 +182,7 @@ class DishUseCaseTest {
         existingDish.setActive(false);
 
         when(dishPersistencePort.findById(100L)).thenReturn(existingDish);
-        when(dishPersistencePort.getUserId()).thenReturn(77L);
+        when(userSessionPort.getUserId()).thenReturn(77L);
 
         DishModel updated = new DishModel();
         updated.setActive(true);
@@ -188,7 +192,7 @@ class DishUseCaseTest {
 
 
         verify(dishPersistencePort).findById(100L);
-        verify(dishPersistencePort).getUserId();
+        verify(userSessionPort).getUserId();
         verify(restaurantPersistencePort).validateRestaurantOwnership(10L, 77L);
         verify(dishPersistencePort).saveDish(existingDish);
 

@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -31,19 +32,21 @@ public class DishJpaAdapter implements IDishPersistencePort {
 
     @Override
     public DishModel findById(Long id) {
-        DishEntity disFound = dishRepository.findById(id).orElse(null);
-        if (disFound == null) {
+        DishEntity dishFound = dishRepository.findById(id).orElse(null);
+        if (dishFound == null) {
             throw new NoDataFoundException("No existe el plato con ese id.");
         }
-        return dishEntityMapper.toModel(disFound);
+        return dishEntityMapper.toModel(dishFound);
     }
 
     @Override
-    public Long getUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        AuthInfo authInfo = (AuthInfo) authentication.getPrincipal();
-        return authInfo.id();
+    public void validateAllDishesBelongToRestaurant(List<Long> dishesId, Long restaurantId) {
+        long count = dishRepository.findValidDishIds(dishesId, restaurantId);
+        if (count != dishesId.size()) {
+            throw new NoDataFoundException("Uno o más platos no pertenecen al restaurante.");
+        }
     }
+
 
     @Override
     public PageResult<DishModel> getDishes(Integer page, Integer size, Long restaurantId, Long categoryId) {

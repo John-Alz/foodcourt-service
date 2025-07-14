@@ -7,6 +7,7 @@ import com.microservice.foodcourt.domain.model.PageResult;
 import com.microservice.foodcourt.domain.spi.ICategoryPersistencePort;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
+import com.microservice.foodcourt.domain.spi.IUserSessionPort;
 import com.microservice.foodcourt.domain.utils.DomainConstants;
 import com.microservice.foodcourt.domain.validation.DishRulesValidation;
 
@@ -15,13 +16,19 @@ public class DishUseCase implements IDishServicePort {
     private final IDishPersistencePort dishPersistencePort;
     private final ICategoryPersistencePort categoryPersistencePort;
     private final IRestaurantPersistencePort restaurantPersistencePort;
+    private final IUserSessionPort userSessionPort;
     private final DishRulesValidation dishRulesValidation;
 
-    public DishUseCase(IDishPersistencePort dishPersistencePort, ICategoryPersistencePort categoryPersistencePort, IRestaurantPersistencePort restaurantPersistencePort, DishRulesValidation dishRulesValidation) {
+    public DishUseCase(IDishPersistencePort dishPersistencePort,
+                       ICategoryPersistencePort categoryPersistencePort,
+                       IRestaurantPersistencePort restaurantPersistencePort,
+                       IUserSessionPort userSessionPort,
+                       DishRulesValidation dishRulesValidation) {
         this.dishPersistencePort = dishPersistencePort;
         this.categoryPersistencePort = categoryPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.dishRulesValidation = dishRulesValidation;
+        this.userSessionPort = userSessionPort;
     }
 
     @Override
@@ -29,7 +36,7 @@ public class DishUseCase implements IDishServicePort {
         dishRulesValidation.validateDishData(dishModel);
         categoryPersistencePort.existCategory(dishModel.getCategory().getId());
         restaurantPersistencePort.validateExist(dishModel.getRestaurant().getId());
-        Long userId = dishPersistencePort.getUserId();
+        Long userId = userSessionPort.getUserId();
         restaurantPersistencePort.validateRestaurantOwnership(dishModel.getRestaurant().getId(), userId);
         dishPersistencePort.saveDish(dishModel);
     }
@@ -38,7 +45,7 @@ public class DishUseCase implements IDishServicePort {
     public void updateDish(Long id, DishModel updateDishModel) {
         DishModel dishFound = dishPersistencePort.findById(id);
         Long restaurantId = dishFound.getRestaurant().getId();
-        Long getUserId = dishPersistencePort.getUserId();
+        Long getUserId = userSessionPort.getUserId();
         restaurantPersistencePort.validateRestaurantOwnership(restaurantId, getUserId);
 
         dishFound.setPrice(updateDishModel.getPrice());
@@ -49,7 +56,7 @@ public class DishUseCase implements IDishServicePort {
     @Override
     public void changeDishStatus(Long id, boolean status) {
         DishModel dishFound = dishPersistencePort.findById(id);
-        Long userId = dishPersistencePort.getUserId();
+        Long userId = userSessionPort.getUserId();
         restaurantPersistencePort.validateRestaurantOwnership(dishFound.getRestaurant().getId(), userId);
         dishFound.setActive(status);
         dishPersistencePort.saveDish(dishFound);
