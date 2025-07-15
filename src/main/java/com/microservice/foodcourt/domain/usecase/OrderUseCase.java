@@ -98,6 +98,9 @@ public class OrderUseCase implements IOrderServicePort  {
         if (!orderFound.getChefId().equals(chefId)) {
             throw new UnauthorizedActionException("No puedes manipular pedidos de otro chef.");
         }
+        String phoneNumberCustomer = orderPersistencePort.getPhoneNumberUser(orderFound.getCustomerId());
+        System.out.println(phoneNumberCustomer);
+        System.out.println(orderFound.getCustomerId());
         orderFound.setStatus(OrderStatusModel.LISTO);
         orderPersistencePort.updateOrder(orderFound);
     }

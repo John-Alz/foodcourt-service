@@ -20,5 +20,7 @@ public interface IOrderPersistencePort {
 
     boolean isOrderAlreadyAssignedToEmployee(Long employeId, Long orderId);
 
+    String getPhoneNumberUser(Long userId);
+
 
 }

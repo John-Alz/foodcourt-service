@@ -4,7 +4,6 @@ import com.microservice.foodcourt.domain.model.PageResult;
 import com.microservice.foodcourt.domain.model.RestaurantModel;
 import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
 import com.microservice.foodcourt.infrastructure.clients.UserClient;
-import com.microservice.foodcourt.infrastructure.dto.RestaurantIdResponseDto;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
 import com.microservice.foodcourt.infrastructure.exception.UnauthorizedException;
 import com.microservice.foodcourt.infrastructure.out.jpa.entity.RestaurantEmployeeEntity;

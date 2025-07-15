@@ -1,6 +1,6 @@
 package com.microservice.foodcourt.infrastructure.clients;
 
-import com.microservice.foodcourt.infrastructure.dto.RestaurantIdResponseDto;
+import com.microservice.foodcourt.infrastructure.dto.PhoneUserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,5 +12,10 @@ public interface UserClient {
     @GetMapping("/{userId}")
     void validateUser(@PathVariable Long userId, @RequestParam String role);
 
+    @GetMapping("/{userId}/restaurant")
+    public PhoneUserResponseDto getRestaurantByEmployee(@PathVariable Long userId);
+
+    @GetMapping("/{userId}/phone")
+    public PhoneUserResponseDto getPhoneByUserId(@PathVariable Long userId);
 
 }
