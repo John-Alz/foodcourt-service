@@ -50,7 +50,7 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(UnauthorizedActionException.class)
     public ResponseEntity<ExceptionRespnse> handleUnauthorizedActionException(UnauthorizedActionException e) {
-        return ResponseEntity.badRequest().body(new ExceptionRespnse("No puedes asignarte platos de otro restaurante.", LocalDateTime.now()));
+        return ResponseEntity.badRequest().body(new ExceptionRespnse(e.getMessage(), LocalDateTime.now()));
     }
 
 }

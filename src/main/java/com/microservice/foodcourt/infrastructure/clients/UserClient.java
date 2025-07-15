@@ -12,7 +12,5 @@ public interface UserClient {
     @GetMapping("/{userId}")
     void validateUser(@PathVariable Long userId, @RequestParam String role);
 
-    @GetMapping("/{userId}/restaurant")
-    public RestaurantIdResponseDto getRestaurantByEmployee(@PathVariable Long userId);
 
 }
