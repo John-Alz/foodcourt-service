@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Entity
 @Table(name = "restaurant")
 @AllArgsConstructor
@@ -23,7 +24,5 @@ public class RestaurantEntity {
     private String phoneNumber;
     private String urlLogo;
     private String nit;
-
-    //TLista de empelados menyToOne
 
 }

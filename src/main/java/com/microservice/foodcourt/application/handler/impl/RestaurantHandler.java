@@ -33,6 +33,11 @@ public class RestaurantHandler implements IRestaurantHandler {
     }
 
     @Override
+    public void createEmployee(Long userId, Long restaurantId) {
+        restaurantServicePort.createEmployee(userId, restaurantId);
+    }
+
+    @Override
     public PageResult<RestaurantResponseDto> getRestaurants(Integer page, Integer size) {
         return restaurantMapper.modelListToResponseList(restaurantServicePort.getRestaurants(page, size));
     }

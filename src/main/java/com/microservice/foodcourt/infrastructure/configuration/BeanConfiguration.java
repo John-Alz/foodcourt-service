@@ -15,10 +15,7 @@ import com.microservice.foodcourt.infrastructure.out.jpa.adapter.*;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IDishEntityMapper;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IOrderEntityMapper;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
-import com.microservice.foodcourt.infrastructure.out.jpa.repository.ICategoryRepository;
-import com.microservice.foodcourt.infrastructure.out.jpa.repository.IDishRepository;
-import com.microservice.foodcourt.infrastructure.out.jpa.repository.IOrderRepository;
-import com.microservice.foodcourt.infrastructure.out.jpa.repository.IRestaurantRepository;
+import com.microservice.foodcourt.infrastructure.out.jpa.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +27,7 @@ public class BeanConfiguration {
     private final IRestaurantRepository restaurantRepository;
     private final IRestaurantEntityMapper restaurantEntityMapper;
     private final UserClient userClient;
+    private final IRestaurantEmployeeRepository employeeRepository;
 
     private final IDishRepository dishRepository;
     private final IDishEntityMapper dishEntityMapper;
@@ -41,7 +39,7 @@ public class BeanConfiguration {
 
     @Bean
     public IRestaurantPersistencePort restaurantPersistencePort() {
-        return new RestaurantJpaAdapter(restaurantRepository, restaurantEntityMapper, userClient);
+        return new RestaurantJpaAdapter(restaurantRepository, restaurantEntityMapper, userClient, employeeRepository);
     }
 
     @Bean

@@ -41,7 +41,15 @@ public class RestaurantRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("create-employee")
+    public ResponseEntity<Object> createEmployee(@RequestParam Long userId, @RequestParam Long restaurantId) {
+        restaurantHandler.createEmployee(userId, restaurantId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+
     @GetMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<PageResult<RestaurantResponseDto>> getRestaurants(Integer page, Integer size) {
         PageResult<RestaurantResponseDto> restaurantResponseDtoPageResult = restaurantHandler.getRestaurants(page, size);
         return ResponseEntity.ok(restaurantResponseDtoPageResult);

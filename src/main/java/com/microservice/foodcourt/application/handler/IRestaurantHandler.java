@@ -11,6 +11,9 @@ public interface IRestaurantHandler {
 
     void validateRestaurantOwnership(Long restaurantId, Long ownerId);
 
+    void createEmployee(Long userId, Long restaurantId);
+
+
     PageResult<RestaurantResponseDto> getRestaurants(Integer page, Integer size);
 
 }

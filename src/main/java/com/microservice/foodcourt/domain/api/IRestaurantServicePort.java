@@ -9,6 +9,8 @@ public interface IRestaurantServicePort {
 
     void validateRestaurantOwnership(Long restaurantId, Long userId);
 
+    void createEmployee(Long userId, Long restaurantId);
+
     PageResult<RestaurantModel> getRestaurants(Integer page, Integer size);
 
 
