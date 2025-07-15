@@ -9,5 +9,6 @@ public interface IOrderServicePort {
     void saveOrder(OrderModel orderModel);
     PageResult<OrderModel> getOrders(Integer page, Integer size, OrderStatusModel status);
     void startOrderPreparation(Long orderId);
+    void markOrderAsReady(Long orderId);
 
 }

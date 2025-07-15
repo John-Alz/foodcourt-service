@@ -44,8 +44,14 @@ public class OrderRestController {
 
     @PatchMapping("/{id}/assign")
     @PreAuthorize("hasRole('EMPLOYEE')")
-    public ResponseEntity<SaveMessageResponse> updateOrder(@PathVariable Long id) {
+    public ResponseEntity<SaveMessageResponse> updateOrderStatusPreparation(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(orderHandler.startOrderPreparation(id));
+    }
+
+    @PatchMapping("/{id}/ready")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<SaveMessageResponse> updateOrderStatusReady(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderHandler.markOrderAsReady(id));
     }
 
 }

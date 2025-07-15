@@ -24,4 +24,6 @@ public class RestaurantEntity {
     private String urlLogo;
     private String nit;
 
+    //TLista de empelados menyToOne
+
 }

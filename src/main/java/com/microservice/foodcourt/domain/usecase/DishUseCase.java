@@ -38,6 +38,7 @@ public class DishUseCase implements IDishServicePort {
         restaurantPersistencePort.validateExist(dishModel.getRestaurant().getId());
         Long userId = userSessionPort.getUserId();
         restaurantPersistencePort.validateRestaurantOwnership(dishModel.getRestaurant().getId(), userId);
+        dishModel.setActive(true); // test
         dishPersistencePort.saveDish(dishModel);
     }
 
