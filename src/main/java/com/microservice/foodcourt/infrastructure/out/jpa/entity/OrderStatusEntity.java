@@ -5,6 +5,7 @@ public enum OrderStatusEntity {
     PENDIENTE,
     PREPARACION,
     LISTO,
-    ENTREGADO
+    ENTREGADO,
+    CANCELADO
 
 }

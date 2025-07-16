@@ -1,6 +1,7 @@
 package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
+import com.microservice.foodcourt.domain.exception.InvalidVerificationCodeException;
 import com.microservice.foodcourt.domain.exception.UnauthorizedActionException;
 import com.microservice.foodcourt.domain.model.*;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
@@ -237,20 +238,26 @@ class OrderUseCaseTest {
         Long chefId = 1L;
         Long restaurantIdFromOrder = 10L;
         Long restaurantIdByEmployee = 99L;
+
         RestaurantModel restaurant = new RestaurantModel();
         restaurant.setId(restaurantIdFromOrder);
 
         OrderModel order = new OrderModel();
         order.setChefId(chefId);
+        order.setStatus(OrderStatusModel.PREPARACION);
+        order.setCustomerId(50L);
         order.setRestaurant(restaurant);
 
         when(userSessionPort.getUserId()).thenReturn(chefId);
         when(orderPersistencePort.getOrderById(anyLong())).thenReturn(order);
         when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantIdByEmployee);
 
+        doThrow(new UnauthorizedActionException("Restaurante no coincide"))
+                .when(orderUpdateRulesValidation)
+                .validateDataMarkReady(eq(restaurantIdByEmployee), eq(restaurantIdFromOrder), eq(chefId), eq(chefId), eq(OrderStatusModel.PREPARACION));
+
         assertThrows(UnauthorizedActionException.class, () -> orderUseCase.markOrderAsReady(123L));
     }
-
 
     @Test
     void markOrderAsReady_ShouldThrow_WhenChefMismatch() {
@@ -258,16 +265,129 @@ class OrderUseCaseTest {
 
         RestaurantModel restaurant = new RestaurantModel();
         restaurant.setId(restaurantId);
+
         OrderModel order = new OrderModel();
         order.setChefId(999L);
+        order.setStatus(OrderStatusModel.PREPARACION);
+        order.setCustomerId(50L);
         order.setRestaurant(restaurant);
 
         when(userSessionPort.getUserId()).thenReturn(1L);
         when(orderPersistencePort.getOrderById(anyLong())).thenReturn(order);
-        when(restaurantPersistencePort.getRestaurantByEmployee(1L)).thenReturn(10L);
+        when(restaurantPersistencePort.getRestaurantByEmployee(1L)).thenReturn(restaurantId);
+
+        doThrow(new UnauthorizedActionException("Chef no coincide"))
+                .when(orderUpdateRulesValidation)
+                .validateDataMarkReady(eq(restaurantId), eq(restaurantId), eq(999L), eq(1L), eq(OrderStatusModel.PREPARACION));
 
         assertThrows(UnauthorizedActionException.class, () -> orderUseCase.markOrderAsReady(123L));
     }
+
+    @Test
+    void markOrderDelivered_ShouldThrow_WhenChefMismatch() {
+        Long restaurantId = 10L;
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantId);
+
+        OrderModel order = new OrderModel();
+        order.setChefId(999L); // No coincide con el ID autenticado
+        order.setStatus(OrderStatusModel.LISTO);
+        order.setCodeVerification("abc123");
+        order.setRestaurant(restaurant);
+
+        when(userSessionPort.getUserId()).thenReturn(1L);
+        when(orderPersistencePort.getOrderById(anyLong())).thenReturn(order);
+        when(restaurantPersistencePort.getRestaurantByEmployee(1L)).thenReturn(restaurantId);
+
+        doThrow(new UnauthorizedActionException("Chef no autorizado"))
+                .when(orderUpdateRulesValidation)
+                .validateDataMarkDelivered(eq(restaurantId), eq(restaurantId), eq(999L), eq(1L), eq(OrderStatusModel.LISTO));
+
+        assertThrows(UnauthorizedActionException.class, () -> orderUseCase.markOrderAsDelivered(123L, "abc123"));
+    }
+
+    @Test
+    void markOrderAsDelivered_ShouldUpdateOrder_WhenCodeIsValid() {
+        Long chefId = 1L;
+        Long orderId = 10L;
+        String validCode = "abc123";
+        Long restaurantId = 10L;
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantId);
+
+        OrderModel order = new OrderModel();
+        order.setChefId(chefId);
+        order.setCodeVerification(validCode);
+        order.setStatus(OrderStatusModel.LISTO);
+        order.setRestaurant(restaurant);
+
+        when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
+        when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantId);
+
+        orderUseCase.markOrderAsDelivered(orderId, validCode);
+
+        assertEquals(OrderStatusModel.ENTREGADO, order.getStatus());
+        verify(orderUpdateRulesValidation).validateDataMarkDelivered(
+                restaurantId, restaurantId, chefId, chefId, OrderStatusModel.LISTO
+        );
+        verify(orderPersistencePort).updateOrder(order);
+    }
+
+    @Test
+    void markOrderAsDelivered_ShouldThrow_WhenCodeIsInvalid() {
+        Long chefId = 1L;
+        Long orderId = 10L;
+        String correctCode = "abc123";
+        String wrongCode = "wrong456";
+        Long restaurantId = 10L;
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantId);
+
+        OrderModel order = new OrderModel();
+        order.setChefId(chefId);
+        order.setCodeVerification(correctCode);
+        order.setStatus(OrderStatusModel.LISTO);
+        order.setRestaurant(restaurant);
+
+        when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
+        when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantId);
+
+        assertThrows(InvalidVerificationCodeException.class, () ->
+                orderUseCase.markOrderAsDelivered(orderId, wrongCode));
+
+        verify(orderUpdateRulesValidation).validateDataMarkDelivered(
+                restaurantId, restaurantId, chefId, chefId, OrderStatusModel.LISTO
+        );
+        verify(orderPersistencePort, never()).updateOrder(any());
+    }
+
+
+    @Test
+    void markOrderAsCancelled_ShouldUpdateOrder_WhenValid() {
+        Long customerId = 5L;
+        Long orderId = 20L;
+
+        OrderModel order = new OrderModel();
+        order.setCustomerId(customerId);
+        order.setStatus(OrderStatusModel.PENDIENTE);
+
+        when(userSessionPort.getUserId()).thenReturn(customerId);
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
+
+        orderUseCase.markOrderAsCancelled(orderId);
+
+        assertEquals(OrderStatusModel.CANCELADO, order.getStatus());
+        verify(orderUpdateRulesValidation).validateDataMarkCancelled(
+                customerId, customerId, OrderStatusModel.PENDIENTE
+        );
+        verify(orderPersistencePort).updateOrder(order);
+    }
+
 
 
 }

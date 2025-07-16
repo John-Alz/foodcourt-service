@@ -125,6 +125,18 @@ public class OrderUseCase implements IOrderServicePort  {
         orderPersistencePort.updateOrder(orderFound);
     }
 
+    @Override
+    public void markOrderAsCancelled(Long orderId) {
+        Long customerId = userSessionPort.getUserId();
+        OrderModel orderFound = orderPersistencePort.getOrderById(orderId);
+        orderUpdateRulesValidation.validateDataMarkCancelled(
+                orderFound.getCustomerId(),
+                customerId,
+                orderFound.getStatus()
+        );
+        orderFound.setStatus(OrderStatusModel.CANCELADO);
+        orderPersistencePort.updateOrder(orderFound);
+    }
 
 
 }

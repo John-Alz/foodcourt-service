@@ -40,6 +40,18 @@ public class OrderUpdateRulesValidation {
         }
     }
 
+    public void validateOrderCancelled(OrderStatusModel orderStatus) {
+        if (orderStatus.equals(OrderStatusModel.CANCELADO)) {
+            throw new InvalidOrderStatusException("La orden fue cancelada anteriormente.");
+        }
+    }
+
+    public void validateOrderByCustomer(Long orderCustomer, Long customerId) {
+        if (!orderCustomer.equals(customerId)) {
+            throw new UnauthorizedActionException("No puedes cancelar pedidos de otro cliente.");
+        }
+    }
+
     public void validateDataUpdate(boolean isAlreadyAssigned, Long chefId, Long restaurantIdByEmployee, Long restaurantId) {
         validateAlreadyAssignedToEmployee(isAlreadyAssigned);
         validateRestaurantByEmployee(restaurantIdByEmployee, restaurantId);
@@ -59,6 +71,12 @@ public class OrderUpdateRulesValidation {
         validateAssignedChef(orderChef);
         validateOrderByChef(orderChef, chefId);
         validateStatusOrder(orderStatus, OrderStatusModel.LISTO, "EL pedido no esta listo,no puedes entregarlo");
+    }
+
+    public void validateDataMarkCancelled(Long orderCustomer, Long customerId, OrderStatusModel orderStatus) {
+        validateOrderByCustomer(orderCustomer, customerId);
+        validateOrderCancelled(orderStatus);
+        validateStatusOrder(orderStatus, OrderStatusModel.PENDIENTE, "Lo sentimos, tu pedido ya está en preparación y no puede cancelarse.");
     }
 
 

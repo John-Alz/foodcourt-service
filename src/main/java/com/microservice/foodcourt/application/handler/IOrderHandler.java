@@ -15,5 +15,7 @@ public interface IOrderHandler {
     SaveMessageResponse startOrderPreparation(Long orderId);
     SaveMessageResponse markOrderAsReady(Long orderId);
     SaveMessageResponse markOrderAsDelivered(Long orderId, OrderCodeVerificationRequestDto codeVerificationRequestDto);
+    SaveMessageResponse markOrderAsCancelled(Long orderId);
+
 
 }
