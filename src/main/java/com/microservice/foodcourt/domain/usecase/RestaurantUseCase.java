@@ -30,6 +30,12 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
+    public void createEmployee(Long userId, Long restaurantId) {
+        restaurantPersistencePort.validateExist(restaurantId);
+        restaurantPersistencePort.createEmployee(userId, restaurantId);
+    }
+
+    @Override
     public PageResult<RestaurantModel> getRestaurants(Integer page, Integer size) {
         if (page < DomainConstants.PAGE_MIN) throw new InvalidPaginationParameterException(DomainConstants.INVALID_PAGE);
         if (size < DomainConstants.SIZE_MIN) throw new InvalidPaginationParameterException(DomainConstants.INVALID_SIZE);

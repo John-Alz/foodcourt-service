@@ -12,7 +12,7 @@ public class OrderUpdateRulesValidation {
 
     public void validateRestaurantByEmployee(Long restaurantIdByEmployee, Long restaurantId) {
         if (!restaurantIdByEmployee.equals(restaurantId)) {
-            throw new UnauthorizedActionException();
+            throw new UnauthorizedActionException("No puedes asignarte platos de otro restaurante.");
         }
     }
 

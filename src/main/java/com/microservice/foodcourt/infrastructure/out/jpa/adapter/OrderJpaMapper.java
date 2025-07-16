@@ -5,6 +5,11 @@ import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.domain.model.PageResult;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
+import com.microservice.foodcourt.infrastructure.clients.MessagingClient;
+import com.microservice.foodcourt.infrastructure.clients.UserClient;
+import com.microservice.foodcourt.infrastructure.dto.CodeVerificationResponseDto;
+import com.microservice.foodcourt.infrastructure.dto.PhoneNumberRequestDto;
+import com.microservice.foodcourt.infrastructure.dto.PhoneUserResponseDto;
 import com.microservice.foodcourt.infrastructure.exception.CustomerHasOngoingOrderException;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
 import com.microservice.foodcourt.infrastructure.out.jpa.entity.*;
@@ -27,6 +32,8 @@ public class OrderJpaMapper implements IOrderPersistencePort {
     private final IOrderEntityMapper orderEntityMapper;
     private final IDishRepository dishRepository;
     private final IRestaurantRepository restaurantRepository;
+    private final UserClient userClient;
+    private final MessagingClient messagingClient;
 
     @Override
     public void saveOrder(OrderModel orderModel) {
@@ -89,6 +96,17 @@ public class OrderJpaMapper implements IOrderPersistencePort {
         return orderRepository.existsByIdAndChefId(employeeId, orderId);
     }
 
+    @Override
+    public String getPhoneNumberUser(Long userId) {
+        PhoneUserResponseDto phoneUser = userClient.getPhoneByUserId(userId);
+        return phoneUser.phoneNumber();
+    }
+
+    @Override
+    public String getCodeVerification(String phoneNumber) {
+        CodeVerificationResponseDto codeVerification = messagingClient.sendCodeVerification(new PhoneNumberRequestDto(phoneNumber));
+        return codeVerification.codeVerification();
+    }
 
 
 }

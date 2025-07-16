@@ -100,4 +100,16 @@ class RestaurantUseCaseTest {
         verify(restaurantPersistencePort, never()).getRestaurants(anyInt(), anyInt());
 
     }
+
+    @Test
+    void createEmployee_ShouldAddEmployeeWithRestaurant() {
+
+        Long userId = 10L;
+        Long restaurantId = 20L;
+
+        restaurantUseCase.createEmployee(userId, restaurantId);
+
+        verify(restaurantPersistencePort, times(1)).validateExist(restaurantId);
+        verify(restaurantPersistencePort, times(1)).createEmployee(userId, restaurantId);
+    }
 }

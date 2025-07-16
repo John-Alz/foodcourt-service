@@ -16,7 +16,6 @@ import org.mapstruct.ReportingPolicy;
 )
 public interface IDishMapper {
 
-    @Mapping(target = "active", constant = "true")
     @Mapping(source = "categoryId", target = "category.id")
     @Mapping(source = "restaurantId", target = "restaurant.id")
     DishModel requestToModel(DishRequestDto dishRequestDto);

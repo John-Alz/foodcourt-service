@@ -2,6 +2,7 @@ package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
+import com.microservice.foodcourt.domain.exception.UnauthorizedActionException;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.domain.model.PageResult;
@@ -81,6 +82,24 @@ public class OrderUseCase implements IOrderServicePort  {
 
         orderFound.setChefId(chefId);
         orderFound.setStatus(OrderStatusModel.PREPARACION);
+        orderPersistencePort.updateOrder(orderFound);
+    }
+
+    @Override
+    public void markOrderAsReady(Long orderId) {
+        Long chefId = userSessionPort.getUserId();
+        OrderModel orderFound = orderPersistencePort.getOrderById(orderId);
+        Long restaurantIdByEmployee = restaurantPersistencePort.getRestaurantByEmployee(chefId);
+        if (!restaurantIdByEmployee.equals(orderFound.getRestaurant().getId())) {
+            throw new UnauthorizedActionException("No puedes asignarte platos de otro restaurante.");
+        }
+        if (!orderFound.getChefId().equals(chefId)) {
+            throw new UnauthorizedActionException("No puedes manipular pedidos de otro chef.");
+        }
+        String phoneNumberCustomer = orderPersistencePort.getPhoneNumberUser(orderFound.getCustomerId());
+        String codeVerification = orderPersistencePort.getCodeVerification(phoneNumberCustomer);
+        orderFound.setStatus(OrderStatusModel.LISTO);
+        orderFound.setCodeVerification(codeVerification);
         orderPersistencePort.updateOrder(orderFound);
     }
 

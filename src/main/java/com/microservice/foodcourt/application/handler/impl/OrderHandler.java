@@ -38,4 +38,10 @@ public class OrderHandler implements IOrderHandler {
         orderServicePort.startOrderPreparation(orderId);
         return new SaveMessageResponse("El pedido esta en preparacion", LocalDateTime.now());
     }
+
+    @Override
+    public SaveMessageResponse markOrderAsReady(Long orderId) {
+        orderServicePort.markOrderAsReady(orderId);
+        return new SaveMessageResponse("El pedido esta listo.", LocalDateTime.now());
+    }
 }

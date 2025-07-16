@@ -1,6 +1,7 @@
 package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
+import com.microservice.foodcourt.domain.exception.UnauthorizedActionException;
 import com.microservice.foodcourt.domain.model.*;
 import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
 import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
@@ -197,6 +198,75 @@ class OrderUseCaseTest {
 
         verify(orderUpdateRulesValidation).validateDataUpdate(false, null, restaurantId, restaurantId);
         verify(orderPersistencePort).updateOrder(order);
+    }
+
+    @Test
+    void markOrderAsReady_ShouldUpdateOrderCorrectly() {
+        Long chefId = 1L;
+        Long restaurantId = 10L;
+        Long customerId = 20L;
+        Long orderId = 100L;
+        String phone = "+573001234567";
+        String code = "XYZ789";
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantId);
+
+        OrderModel order = new OrderModel();
+        order.setId(orderId);
+        order.setChefId(chefId);
+        order.setCustomerId(customerId);
+        order.setRestaurant(restaurant);
+        order.setStatus(OrderStatusModel.PREPARACION);
+
+        when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
+        when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantId);
+        when(orderPersistencePort.getPhoneNumberUser(customerId)).thenReturn(phone);
+        when(orderPersistencePort.getCodeVerification(phone)).thenReturn(code);
+
+        orderUseCase.markOrderAsReady(orderId);
+
+        assertEquals(OrderStatusModel.LISTO, order.getStatus());
+        assertEquals(code, order.getCodeVerification());
+        verify(orderPersistencePort).updateOrder(order);
+    }
+
+    @Test
+    void markOrderAsReady_ShouldThrow_WhenRestaurantMismatch() {
+        Long chefId = 1L;
+        Long restaurantIdFromOrder = 10L;
+        Long restaurantIdByEmployee = 99L;
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantIdFromOrder);
+
+        OrderModel order = new OrderModel();
+        order.setChefId(chefId);
+        order.setRestaurant(restaurant);
+
+        when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(orderPersistencePort.getOrderById(anyLong())).thenReturn(order);
+        when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantIdByEmployee);
+
+        assertThrows(UnauthorizedActionException.class, () -> orderUseCase.markOrderAsReady(123L));
+    }
+
+
+    @Test
+    void markOrderAsReady_ShouldThrow_WhenChefMismatch() {
+        Long restaurantId = 10L;
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantId);
+        OrderModel order = new OrderModel();
+        order.setChefId(999L);
+        order.setRestaurant(restaurant);
+
+        when(userSessionPort.getUserId()).thenReturn(1L);
+        when(orderPersistencePort.getOrderById(anyLong())).thenReturn(order);
+        when(restaurantPersistencePort.getRestaurantByEmployee(1L)).thenReturn(10L);
+
+        assertThrows(UnauthorizedActionException.class, () -> orderUseCase.markOrderAsReady(123L));
     }
 
 

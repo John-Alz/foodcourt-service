@@ -31,6 +31,7 @@ public class DishRestController {
             @ApiResponse(responseCode = "201", description = "Plato creado.", content = @Content),
             @ApiResponse(responseCode = "404", description = "Error de validacion", content = @Content),
     })
+
     @PostMapping()
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<SaveMessageResponse> saveDish(@RequestBody DishRequestDto dishRequestDto) {
@@ -55,6 +56,7 @@ public class DishRestController {
     }
 
     @GetMapping("/{restaurantId}/menu")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<PageResult<DishResponseDto>> getDishes(@PathVariable Long restaurantId, Integer page, Integer size, Long categoryId) {
         PageResult<DishResponseDto> dishResponseDtoPageResult = dishHandler.getDishes(page, size, restaurantId, categoryId);
         return ResponseEntity.ok(dishResponseDtoPageResult);
