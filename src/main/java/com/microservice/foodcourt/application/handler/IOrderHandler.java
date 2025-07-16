@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.application.handler;
 
+import com.microservice.foodcourt.application.dto.request.OrderCodeVerificationRequestDto;
 import com.microservice.foodcourt.application.dto.request.OrderRequestDto;
 import com.microservice.foodcourt.application.dto.response.OrderResponseDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
@@ -13,5 +14,6 @@ public interface IOrderHandler {
 
     SaveMessageResponse startOrderPreparation(Long orderId);
     SaveMessageResponse markOrderAsReady(Long orderId);
+    SaveMessageResponse markOrderAsDelivered(Long orderId, OrderCodeVerificationRequestDto codeVerificationRequestDto);
 
 }

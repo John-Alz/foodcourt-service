@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.infrastructure.input.rest;
 
+import com.microservice.foodcourt.application.dto.request.OrderCodeVerificationRequestDto;
 import com.microservice.foodcourt.application.dto.request.OrderRequestDto;
 import com.microservice.foodcourt.application.dto.response.OrderResponseDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
@@ -52,6 +53,12 @@ public class OrderRestController {
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ResponseEntity<SaveMessageResponse> updateOrderStatusReady(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(orderHandler.markOrderAsReady(id));
+    }
+
+    @PatchMapping("/{id}/deliver")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<SaveMessageResponse> updateOrderStatusDelivered(@PathVariable Long id, @RequestBody OrderCodeVerificationRequestDto codeVerificationRequestDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderHandler.markOrderAsDelivered(id, codeVerificationRequestDto));
     }
 
 }

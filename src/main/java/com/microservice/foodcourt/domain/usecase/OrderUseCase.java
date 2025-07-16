@@ -1,7 +1,9 @@
 package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
+import com.microservice.foodcourt.domain.exception.InvalidOrderStatusException;
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
+import com.microservice.foodcourt.domain.exception.InvalidVerificationCodeException;
 import com.microservice.foodcourt.domain.exception.UnauthorizedActionException;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
@@ -90,17 +92,39 @@ public class OrderUseCase implements IOrderServicePort  {
         Long chefId = userSessionPort.getUserId();
         OrderModel orderFound = orderPersistencePort.getOrderById(orderId);
         Long restaurantIdByEmployee = restaurantPersistencePort.getRestaurantByEmployee(chefId);
-        if (!restaurantIdByEmployee.equals(orderFound.getRestaurant().getId())) {
-            throw new UnauthorizedActionException("No puedes asignarte platos de otro restaurante.");
-        }
-        if (!orderFound.getChefId().equals(chefId)) {
-            throw new UnauthorizedActionException("No puedes manipular pedidos de otro chef.");
-        }
+        orderUpdateRulesValidation.validateDataMarkReady(
+                restaurantIdByEmployee,
+                orderFound.getRestaurant().getId(),
+                orderFound.getChefId(),
+                chefId,
+                orderFound.getStatus()
+        );
         String phoneNumberCustomer = orderPersistencePort.getPhoneNumberUser(orderFound.getCustomerId());
         String codeVerification = orderPersistencePort.getCodeVerification(phoneNumberCustomer);
         orderFound.setStatus(OrderStatusModel.LISTO);
         orderFound.setCodeVerification(codeVerification);
         orderPersistencePort.updateOrder(orderFound);
     }
+
+    @Override
+    public void markOrderAsDelivered(Long orderId, String codeProvideByCustomer) {
+        Long chefId = userSessionPort.getUserId();
+        OrderModel orderFound = orderPersistencePort.getOrderById(orderId);
+        Long restaurantIdByEmployee = restaurantPersistencePort.getRestaurantByEmployee(chefId);
+        orderUpdateRulesValidation.validateDataMarkDelivered(
+                restaurantIdByEmployee,
+                orderFound.getRestaurant().getId(),
+                orderFound.getChefId(),
+                chefId,
+                orderFound.getStatus()
+        );
+        if (!codeProvideByCustomer.equals(orderFound.getCodeVerification())) {
+            throw new InvalidVerificationCodeException();
+        }
+        orderFound.setStatus(OrderStatusModel.ENTREGADO);
+        orderPersistencePort.updateOrder(orderFound);
+    }
+
+
 
 }

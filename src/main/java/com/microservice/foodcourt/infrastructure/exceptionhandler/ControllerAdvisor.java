@@ -53,4 +53,14 @@ public class ControllerAdvisor {
         return ResponseEntity.badRequest().body(new ExceptionRespnse(e.getMessage(), LocalDateTime.now()));
     }
 
+    @ExceptionHandler(InvalidOrderStatusException.class)
+    public ResponseEntity<ExceptionRespnse> handleInvalidOrderStatusException(InvalidOrderStatusException e) {
+        return ResponseEntity.badRequest().body(new ExceptionRespnse(e.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(InvalidVerificationCodeException.class)
+    public ResponseEntity<ExceptionRespnse> handleInvalidVerificationCodeException(InvalidVerificationCodeException e) {
+        return ResponseEntity.badRequest().body(new ExceptionRespnse("El codigo de verificacion no es correcto", LocalDateTime.now()));
+    }
+
 }
