@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.application.handler.impl;
 
+import com.microservice.foodcourt.application.dto.request.OrderCodeVerificationRequestDto;
 import com.microservice.foodcourt.application.dto.request.OrderRequestDto;
 import com.microservice.foodcourt.application.dto.response.OrderResponseDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
@@ -43,5 +44,11 @@ public class OrderHandler implements IOrderHandler {
     public SaveMessageResponse markOrderAsReady(Long orderId) {
         orderServicePort.markOrderAsReady(orderId);
         return new SaveMessageResponse("El pedido esta listo.", LocalDateTime.now());
+    }
+
+    @Override
+    public SaveMessageResponse markOrderAsDelivered(Long orderId, OrderCodeVerificationRequestDto codeVerificationRequestDto) {
+        orderServicePort.markOrderAsDelivered(orderId, codeVerificationRequestDto.codeVerification());
+        return new SaveMessageResponse("El pedido entregado.", LocalDateTime.now());
     }
 }
