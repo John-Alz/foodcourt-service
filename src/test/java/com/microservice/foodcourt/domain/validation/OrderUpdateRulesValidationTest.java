@@ -129,4 +129,89 @@ class OrderUpdateRulesValidationTest {
                 validator.validateDataMarkDelivered(1L, 1L, 1L, 1L, OrderStatusModel.LISTO)
         );
     }
+
+    @Test
+    void validateOrderCancelled_ShouldThrow_WhenOrderIsCancelled() {
+        assertThrows(InvalidOrderStatusException.class, () ->
+                validator.validateOrderCancelled(OrderStatusModel.CANCELADO)
+        );
+    }
+
+    @Test
+    void validateOrderCancelled_ShouldNotThrow_WhenOrderIsNotCancelled() {
+        assertDoesNotThrow(() ->
+                validator.validateOrderCancelled(OrderStatusModel.PENDIENTE)
+        );
+    }
+
+    @Test
+    void validateOrderByCustomer_ShouldThrow_WhenCustomerIdDoesNotMatch() {
+        assertThrows(UnauthorizedActionException.class, () ->
+                validator.validateOrderByCustomer(1L, 2L)
+        );
+    }
+
+    @Test
+    void validateOrderByCustomer_ShouldNotThrow_WhenCustomerIdMatches() {
+        assertDoesNotThrow(() ->
+                validator.validateOrderByCustomer(1L, 1L)
+        );
+    }
+
+    @Test
+    void validateDataUpdate_ShouldThrow_WhenRestaurantDoesNotMatch() {
+        assertThrows(UnauthorizedActionException.class, () ->
+                validator.validateDataUpdate(false, null, 1L, 2L)
+        );
+    }
+
+    @Test
+    void validateDataUpdate_ShouldThrow_WhenChefIsAlreadyAssigned() {
+        assertThrows(DataFoundException.class, () ->
+                validator.validateDataUpdate(false, 99L, 1L, 1L)
+        );
+    }
+
+    @Test
+    void validateDataUpdate_ShouldNotThrow_WhenValid() {
+        assertDoesNotThrow(() ->
+                validator.validateDataUpdate(false, null, 1L, 1L)
+        );
+    }
+
+    @Test
+    void validateDataMarkReady_ShouldNotThrow_WhenValidData() {
+        assertDoesNotThrow(() ->
+                validator.validateDataMarkReady(1L, 1L, 1L, 1L, OrderStatusModel.PREPARACION)
+        );
+    }
+
+    @Test
+    void validateDataMarkCancelled_ShouldThrow_WhenCustomerDoesNotMatch() {
+        assertThrows(UnauthorizedActionException.class, () ->
+                validator.validateDataMarkCancelled(1L, 2L, OrderStatusModel.PENDIENTE)
+        );
+    }
+
+    @Test
+    void validateDataMarkCancelled_ShouldThrow_WhenOrderAlreadyCancelled() {
+        assertThrows(InvalidOrderStatusException.class, () ->
+                validator.validateDataMarkCancelled(1L, 1L, OrderStatusModel.CANCELADO)
+        );
+    }
+
+    @Test
+    void validateDataMarkCancelled_ShouldThrow_WhenOrderIsNotPending() {
+        assertThrows(InvalidOrderStatusException.class, () ->
+                validator.validateDataMarkCancelled(1L, 1L, OrderStatusModel.PREPARACION)
+        );
+    }
+
+    @Test
+    void validateDataMarkCancelled_ShouldNotThrow_WhenOrderIsPendingAndCustomerMatches() {
+        assertDoesNotThrow(() ->
+                validator.validateDataMarkCancelled(1L, 1L, OrderStatusModel.PENDIENTE)
+        );
+    }
+
 }

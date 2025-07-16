@@ -61,4 +61,10 @@ public class OrderRestController {
         return ResponseEntity.status(HttpStatus.OK).body(orderHandler.markOrderAsDelivered(id, codeVerificationRequestDto));
     }
 
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<SaveMessageResponse> updateOrderStatusCancel(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderHandler.markOrderAsCancelled(id));
+    }
+
 }

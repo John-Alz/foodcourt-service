@@ -51,4 +51,10 @@ public class OrderHandler implements IOrderHandler {
         orderServicePort.markOrderAsDelivered(orderId, codeVerificationRequestDto.codeVerification());
         return new SaveMessageResponse("El pedido entregado.", LocalDateTime.now());
     }
+
+    @Override
+    public SaveMessageResponse markOrderAsCancelled(Long orderId) {
+        orderServicePort.markOrderAsCancelled(orderId);
+        return new SaveMessageResponse("Pedido cancelado", LocalDateTime.now());
+    }
 }

@@ -5,6 +5,7 @@ public enum OrderStatusModel {
     PENDIENTE,
     PREPARACION,
     LISTO,
-    ENTREGADO
+    ENTREGADO,
+    CANCELADO
 
 }
