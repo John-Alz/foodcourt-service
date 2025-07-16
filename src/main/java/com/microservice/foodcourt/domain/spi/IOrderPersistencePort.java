@@ -22,5 +22,7 @@ public interface IOrderPersistencePort {
 
     String getPhoneNumberUser(Long userId);
 
+    String getCodeVerification(String phoneNumber);
+
 
 }

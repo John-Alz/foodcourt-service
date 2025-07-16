@@ -93,15 +93,13 @@ public class OrderUseCase implements IOrderServicePort  {
         if (!restaurantIdByEmployee.equals(orderFound.getRestaurant().getId())) {
             throw new UnauthorizedActionException("No puedes asignarte platos de otro restaurante.");
         }
-        System.out.println(orderFound.getChefId());
-        System.out.println(chefId);
         if (!orderFound.getChefId().equals(chefId)) {
             throw new UnauthorizedActionException("No puedes manipular pedidos de otro chef.");
         }
         String phoneNumberCustomer = orderPersistencePort.getPhoneNumberUser(orderFound.getCustomerId());
-        System.out.println(phoneNumberCustomer);
-        System.out.println(orderFound.getCustomerId());
+        String codeVerification = orderPersistencePort.getCodeVerification(phoneNumberCustomer);
         orderFound.setStatus(OrderStatusModel.LISTO);
+        orderFound.setCodeVerification(codeVerification);
         orderPersistencePort.updateOrder(orderFound);
     }
 

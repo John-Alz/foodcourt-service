@@ -35,5 +35,7 @@ public class OrderEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<DishOrderEntity> dishes;
 
+    private String codeVerification;
+
 
 }

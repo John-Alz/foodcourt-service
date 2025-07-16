@@ -12,10 +12,11 @@ public class OrderModel {
     private Long chefId;
     private RestaurantModel restaurant;
     private List<DishOrderModel> dishes;
+    private String codeVerification;
 
     public OrderModel() {}
 
-    public OrderModel(Long id, Long customerId, LocalDateTime date, OrderStatusModel status, Long chefId, RestaurantModel restaurant, List<DishOrderModel> dishes) {
+    public OrderModel(Long id, Long customerId, LocalDateTime date, OrderStatusModel status, Long chefId, RestaurantModel restaurant, List<DishOrderModel> dishes, String codeVerification) {
         this.id = id;
         this.customerId = customerId;
         this.date = date;
@@ -23,6 +24,7 @@ public class OrderModel {
         this.chefId = chefId;
         this.restaurant = restaurant;
         this.dishes = dishes;
+        this.codeVerification = codeVerification;
     }
 
     public Long getId() {
@@ -79,5 +81,13 @@ public class OrderModel {
 
     public void setDishes(List<DishOrderModel> dishes) {
         this.dishes = dishes;
+    }
+
+    public String getCodeVerification() {
+        return codeVerification;
+    }
+
+    public void setCodeVerification(String codeVerification) {
+        this.codeVerification = codeVerification;
     }
 }

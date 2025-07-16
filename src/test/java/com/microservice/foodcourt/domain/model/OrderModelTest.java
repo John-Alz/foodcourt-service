@@ -49,7 +49,8 @@ class OrderModelTest {
                 OrderStatusModel.PREPARACION,
                 99L,
                 restaurant,
-                dishes
+                dishes,
+                "123456"
         );
 
         assertEquals(2L, order.getId());
