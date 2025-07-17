@@ -33,4 +33,17 @@ public class DomainConstants {
     public static final String INVALID_PAGE = "La pagina no puede ser menor a cero.";
     public static final String INVALID_SIZE = "El tamaño de la pagina no puede ser menor a cero.";
 
+
+    //Update order.
+    public static final String ORDER_ALREADY_ASSIGNED_TO_EMPLOYEE = "Ya te asignaste este pedido.";
+    public static final String CANNOT_MANAGE_OTHER_RESTAURANT_ORDERS = "No puedes manipular pedidos de otro restaurante.";
+    public static final String CHEF_ALREADY_ASSIGNED = "Ya existe un chef asignado a este pedido.";
+    public static final String ORDER_HAS_NO_ASSIGNED_CHEF = "Este pedido aun no tiene un chef asignado.";
+    public static final String CANNOT_MANAGE_OTHER_CHEF_ORDERS = "No puedes manipular pedidos de otro chef.";
+    public static final String ORDER_ALREADY_CANCELLED = "La orden fue cancelada anteriormente.";
+    public static final String CANNOT_CANCEL_OTHER_CUSTOMER_ORDER = "No puedes cancelar pedidos de otro cliente.";
+    public static final String ORDER_NOT_IN_PREPARATION = "EL pedido no esta en preparacion,no puedes notificar al cliente.";
+    public static final String ORDER_NOT_READY_TO_DELIVER = "EL pedido no esta listo,no puedes entregarlo.";
+    public static final String ORDER_CANNOT_BE_CANCELLED_AFTER_PREPARATION = "Lo sentimos, tu pedido ya está en preparación y no puede cancelarse.";
+
 }

@@ -5,6 +5,7 @@ import com.microservice.foodcourt.application.dto.response.RestaurantResponseDto
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
 import com.microservice.foodcourt.application.handler.IRestaurantHandler;
 import com.microservice.foodcourt.application.mapper.IRestaurantMapper;
+import com.microservice.foodcourt.application.utils.ApplicationConstants;
 import com.microservice.foodcourt.domain.api.IRestaurantServicePort;
 import com.microservice.foodcourt.domain.model.PageResult;
 import jakarta.transaction.Transactional;
@@ -24,7 +25,7 @@ public class RestaurantHandler implements IRestaurantHandler {
     @Override
     public SaveMessageResponse saveRestaurant(RestaurantRequestDto restaurantRequestDto) {
         restaurantServicePort.saveRestaurant(restaurantMapper.requestToModel(restaurantRequestDto));
-        return new SaveMessageResponse("Restaurante creado.", LocalDateTime.now());
+        return new SaveMessageResponse(ApplicationConstants.CREATED_RESTAURANT_MESSAGE, LocalDateTime.now());
     }
 
     @Override

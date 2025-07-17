@@ -1,10 +1,8 @@
 package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
-import com.microservice.foodcourt.domain.exception.InvalidOrderStatusException;
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
 import com.microservice.foodcourt.domain.exception.InvalidVerificationCodeException;
-import com.microservice.foodcourt.domain.exception.UnauthorizedActionException;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.domain.model.PageResult;
