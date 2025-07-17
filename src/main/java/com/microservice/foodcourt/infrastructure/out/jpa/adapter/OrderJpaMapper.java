@@ -17,6 +17,7 @@ import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IOrderEntityMapp
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IDishRepository;
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IOrderRepository;
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IRestaurantRepository;
+import com.microservice.foodcourt.infrastructure.utils.InfrastructureConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,7 +44,7 @@ public class OrderJpaMapper implements IOrderPersistencePort {
             Long dishId = dishOrderModel.getDish().getId();
             DishEntity dish = dishRepository.findById(dishId).orElse(null);
             if (dish == null) {
-                throw new NoDataFoundException("No se escontro el plato");
+                throw new NoDataFoundException(InfrastructureConstants.DISH_NOT_FOUND);
             }
             DishOrderEntityId dishOrderEntityId = new DishOrderEntityId(null, dish.getId());
             DishOrderEntity  dishOrder = new DishOrderEntity();
@@ -82,7 +83,7 @@ public class OrderJpaMapper implements IOrderPersistencePort {
     @Override
     public OrderModel getOrderById(Long orderId) {
         OrderEntity orderFound = orderRepository.findById(orderId).orElse(null);
-        if (orderFound == null) throw new NoDataFoundException("No existe una orden con ese id.");
+        if (orderFound == null) throw new NoDataFoundException(InfrastructureConstants.ORDER_NOT_FOUND);
         return orderEntityMapper.toModel(orderFound);
     }
 

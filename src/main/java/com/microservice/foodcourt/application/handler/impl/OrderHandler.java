@@ -6,6 +6,7 @@ import com.microservice.foodcourt.application.dto.response.OrderResponseDto;
 import com.microservice.foodcourt.application.dto.response.SaveMessageResponse;
 import com.microservice.foodcourt.application.handler.IOrderHandler;
 import com.microservice.foodcourt.application.mapper.IOrderMapper;
+import com.microservice.foodcourt.application.utils.ApplicationConstants;
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.domain.model.PageResult;
@@ -26,7 +27,7 @@ public class OrderHandler implements IOrderHandler {
     @Override
     public SaveMessageResponse saveOrder(OrderRequestDto orderRequestDto) {
         orderServicePort.saveOrder(orderMapper.requestToModel(orderRequestDto));
-        return new SaveMessageResponse("Pedido creado.", LocalDateTime.now());
+        return new SaveMessageResponse(ApplicationConstants.CREATED_ORDER_MESSAGE, LocalDateTime.now());
     }
 
     @Override
@@ -37,24 +38,24 @@ public class OrderHandler implements IOrderHandler {
     @Override
     public SaveMessageResponse startOrderPreparation(Long orderId) {
         orderServicePort.startOrderPreparation(orderId);
-        return new SaveMessageResponse("El pedido esta en preparacion", LocalDateTime.now());
+        return new SaveMessageResponse(ApplicationConstants.STATUS_PREPARATION_ORDER_MESSAGE, LocalDateTime.now());
     }
 
     @Override
     public SaveMessageResponse markOrderAsReady(Long orderId) {
         orderServicePort.markOrderAsReady(orderId);
-        return new SaveMessageResponse("El pedido esta listo.", LocalDateTime.now());
+        return new SaveMessageResponse(ApplicationConstants.STATUS_READY_ORDER_MESSAGE, LocalDateTime.now());
     }
 
     @Override
     public SaveMessageResponse markOrderAsDelivered(Long orderId, OrderCodeVerificationRequestDto codeVerificationRequestDto) {
         orderServicePort.markOrderAsDelivered(orderId, codeVerificationRequestDto.codeVerification());
-        return new SaveMessageResponse("El pedido entregado.", LocalDateTime.now());
+        return new SaveMessageResponse(ApplicationConstants.STATUS_DELIVERED_ORDER_MESSAGE, LocalDateTime.now());
     }
 
     @Override
     public SaveMessageResponse markOrderAsCancelled(Long orderId) {
         orderServicePort.markOrderAsCancelled(orderId);
-        return new SaveMessageResponse("Pedido cancelado", LocalDateTime.now());
+        return new SaveMessageResponse(ApplicationConstants.STATUS_CANCELLED_ORDER_MESSAGE, LocalDateTime.now());
     }
 }

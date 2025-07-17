@@ -11,6 +11,7 @@ import com.microservice.foodcourt.infrastructure.out.jpa.entity.RestaurantEntity
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IRestaurantEmployeeRepository;
 import com.microservice.foodcourt.infrastructure.out.jpa.repository.IRestaurantRepository;
+import com.microservice.foodcourt.infrastructure.utils.InfrastructureConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,7 +37,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     @Override
     public void validateExist(Long id) {
         if (!restaurantRepository.existsById(id)) {
-            throw new NoDataFoundException("No existe un restaurante con ese id");
+            throw new NoDataFoundException(InfrastructureConstants.RESTAURANT_NOT_FOUND);
         }
     }
 
@@ -44,7 +45,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     public void validateRestaurantOwnership(Long restaurantId, Long userId) {
         RestaurantEntity restaurantFound = restaurantRepository.findById(restaurantId).orElse(null);
         if (restaurantFound == null) {
-            throw new NoDataFoundException("Restaurante no encontrado.");
+            throw new NoDataFoundException(InfrastructureConstants.RESTAURANT_NOT_FOUND);
         }
         if (!restaurantFound.getOwnerId().equals(userId)) {
             throw new UnauthorizedException();
@@ -54,7 +55,7 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     @Override
     public void createEmployee(Long userId, Long restaurantId) {
         RestaurantEntity restaurant = restaurantRepository.findById(restaurantId).orElse(null);
-        if (restaurant == null) throw new NoDataFoundException("Restaurante no encontrado");
+        if (restaurant == null) throw new NoDataFoundException(InfrastructureConstants.RESTAURANT_NOT_FOUND);
         RestaurantEmployeeEntity employeeEntity = new RestaurantEmployeeEntity();
         employeeEntity.setRestaurant(restaurant);
         employeeEntity.setEmployeeUserId(userId);
@@ -80,9 +81,8 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     public Long getRestaurantByEmployee(Long employeeId) {
         RestaurantEmployeeEntity restaurantEmployeeFound = employeeRepository.findRestaurantEmployeeEntityByEmployeeUserId(employeeId).orElse(null);
         if (restaurantEmployeeFound == null) {
-            throw new NoDataFoundException("No se econtro ningun restaurante al que pertenece el usuario.");
+            throw new NoDataFoundException(InfrastructureConstants.RESTAURANT_NOT_FOUND_FOR_USER);
         }
-        System.out.println(restaurantEmployeeFound.getRestaurant().getId());
         return restaurantEmployeeFound.getRestaurant().getId();
     }
 
