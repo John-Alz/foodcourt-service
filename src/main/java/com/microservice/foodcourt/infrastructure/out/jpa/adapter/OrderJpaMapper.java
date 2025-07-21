@@ -1,5 +1,6 @@
 package com.microservice.foodcourt.infrastructure.out.jpa.adapter;
 
+import com.microservice.foodcourt.domain.dto.UserContactInfoDto;
 import com.microservice.foodcourt.domain.model.DishOrderModel;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
@@ -9,7 +10,7 @@ import com.microservice.foodcourt.infrastructure.clients.MessagingClient;
 import com.microservice.foodcourt.infrastructure.clients.UserClient;
 import com.microservice.foodcourt.infrastructure.dto.CodeVerificationResponseDto;
 import com.microservice.foodcourt.infrastructure.dto.PhoneNumberRequestDto;
-import com.microservice.foodcourt.infrastructure.dto.PhoneUserResponseDto;
+import com.microservice.foodcourt.infrastructure.dto.InfoUserResponseDto;
 import com.microservice.foodcourt.infrastructure.exception.CustomerHasOngoingOrderException;
 import com.microservice.foodcourt.infrastructure.exception.NoDataFoundException;
 import com.microservice.foodcourt.infrastructure.out.jpa.entity.*;
@@ -37,7 +38,7 @@ public class OrderJpaMapper implements IOrderPersistencePort {
     private final MessagingClient messagingClient;
 
     @Override
-    public void saveOrder(OrderModel orderModel) {
+    public OrderModel saveOrder(OrderModel orderModel) {
         OrderEntity orderEntity = orderEntityMapper.toEntity(orderModel);
         List<DishOrderEntity> dishOrders = new ArrayList<>();
         for (DishOrderModel dishOrderModel : orderModel.getDishes()) {
@@ -55,7 +56,8 @@ public class OrderJpaMapper implements IOrderPersistencePort {
             dishOrders.add(dishOrder);
         }
         orderEntity.setDishes(dishOrders);
-        orderRepository.save(orderEntity);
+        OrderEntity orderSaved = orderRepository.save(orderEntity);
+        return orderEntityMapper.toModel(orderSaved);
     }
 
     @Override
@@ -98,10 +100,16 @@ public class OrderJpaMapper implements IOrderPersistencePort {
     }
 
     @Override
-    public String getPhoneNumberUser(Long userId) {
-        PhoneUserResponseDto phoneUser = userClient.getPhoneByUserId(userId);
-        return phoneUser.phoneNumber();
+    public UserContactInfoDto getInfoContactUser(Long userId) {
+        InfoUserResponseDto userResponseDto = userClient.getInfoByUserId(userId);
+        return new UserContactInfoDto(userResponseDto.phoneNumber(), userResponseDto.email());
     }
+
+//    @Override
+//    public String getPhoneNumberUser(Long userId) {
+//        InfoUserResponseDto phoneUser = userClient.getPhoneByUserId(userId);
+//        return phoneUser.phoneNumber();
+//    }
 
     @Override
     public String getCodeVerification(String phoneNumber) {

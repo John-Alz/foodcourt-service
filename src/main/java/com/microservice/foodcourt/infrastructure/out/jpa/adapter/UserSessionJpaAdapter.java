@@ -12,4 +12,11 @@ public class UserSessionJpaAdapter implements IUserSessionPort {
         AuthInfo authInfo = (AuthInfo) authentication.getPrincipal();
         return authInfo.id();
     }
+
+    @Override
+    public String getUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        AuthInfo authInfo = (AuthInfo) authentication.getPrincipal();
+        return authInfo.email();
+    }
 }

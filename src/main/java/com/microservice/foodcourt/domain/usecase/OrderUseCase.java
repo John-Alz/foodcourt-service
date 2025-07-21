@@ -1,15 +1,14 @@
 package com.microservice.foodcourt.domain.usecase;
 
 import com.microservice.foodcourt.domain.api.IOrderServicePort;
+import com.microservice.foodcourt.domain.dto.TraceabilityRequestDto;
+import com.microservice.foodcourt.domain.dto.UserContactInfoDto;
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
 import com.microservice.foodcourt.domain.exception.InvalidVerificationCodeException;
 import com.microservice.foodcourt.domain.model.OrderModel;
 import com.microservice.foodcourt.domain.model.OrderStatusModel;
 import com.microservice.foodcourt.domain.model.PageResult;
-import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
-import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
-import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
-import com.microservice.foodcourt.domain.spi.IUserSessionPort;
+import com.microservice.foodcourt.domain.spi.*;
 import com.microservice.foodcourt.domain.utils.DomainConstants;
 import com.microservice.foodcourt.domain.validation.OrderUpdateRulesValidation;
 
@@ -22,17 +21,20 @@ public class OrderUseCase implements IOrderServicePort  {
     private final IDishPersistencePort dishPersistencePort;
     private final IUserSessionPort userSessionPort;
     private final OrderUpdateRulesValidation orderUpdateRulesValidation;
+    private final ITraceabilityPersistencePort traceabilityPersistencePort;
 
-    public OrderUseCase(IOrderPersistencePort orderPersistencePort, 
-                        IRestaurantPersistencePort restaurantPersistencePort, 
+    public OrderUseCase(IOrderPersistencePort orderPersistencePort,
+                        IRestaurantPersistencePort restaurantPersistencePort,
                         IDishPersistencePort dishPersistencePort,
                         IUserSessionPort userSessionPort,
-                        OrderUpdateRulesValidation orderUpdateRulesValidation) {
+                        OrderUpdateRulesValidation orderUpdateRulesValidation,
+                        ITraceabilityPersistencePort traceabilityPersistencePort) {
         this.orderPersistencePort = orderPersistencePort;
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.dishPersistencePort = dishPersistencePort;
         this.userSessionPort = userSessionPort;
         this.orderUpdateRulesValidation = orderUpdateRulesValidation;
+        this.traceabilityPersistencePort = traceabilityPersistencePort;
     }
 
     @Override
@@ -54,7 +56,8 @@ public class OrderUseCase implements IOrderServicePort  {
             dishPersistencePort.findById(dishId);
         }
         dishPersistencePort.validateAllDishesBelongToRestaurant(dishesId, orderModel.getRestaurant().getId());
-        orderPersistencePort.saveOrder(orderModel);
+        OrderModel orderSaved = orderPersistencePort.saveOrder(orderModel);
+        reecordOrderTraceability(orderSaved, orderSaved.getStatus(), orderSaved.getStatus());
     }
 
     @Override
@@ -80,8 +83,12 @@ public class OrderUseCase implements IOrderServicePort  {
                 restaurantIdByEmployee,
                 orderFound.getRestaurant().getId());
 
+        OrderStatusModel prevStatus = orderFound.getStatus();
         orderFound.setChefId(chefId);
         orderFound.setStatus(OrderStatusModel.PREPARACION);
+
+        //Trazabilidad
+        reecordOrderTraceability(orderFound, prevStatus, orderFound.getStatus());
         orderPersistencePort.updateOrder(orderFound);
     }
 
@@ -97,10 +104,14 @@ public class OrderUseCase implements IOrderServicePort  {
                 chefId,
                 orderFound.getStatus()
         );
-        String phoneNumberCustomer = orderPersistencePort.getPhoneNumberUser(orderFound.getCustomerId());
-        String codeVerification = orderPersistencePort.getCodeVerification(phoneNumberCustomer);
+        UserContactInfoDto userContactInfo = orderPersistencePort.getInfoContactUser(orderFound.getCustomerId());
+        String codeVerification = orderPersistencePort.getCodeVerification(userContactInfo.phoneNumber());
+        OrderStatusModel prevStatus = orderFound.getStatus();
         orderFound.setStatus(OrderStatusModel.LISTO);
         orderFound.setCodeVerification(codeVerification);
+
+        //Trazabilidad
+        reecordOrderTraceability(orderFound, prevStatus, orderFound.getStatus());
         orderPersistencePort.updateOrder(orderFound);
     }
 
@@ -119,7 +130,9 @@ public class OrderUseCase implements IOrderServicePort  {
         if (!codeProvideByCustomer.equals(orderFound.getCodeVerification())) {
             throw new InvalidVerificationCodeException();
         }
+        OrderStatusModel prevStatus = orderFound.getStatus();
         orderFound.setStatus(OrderStatusModel.ENTREGADO);
+        reecordOrderTraceability(orderFound, prevStatus, orderFound.getStatus());
         orderPersistencePort.updateOrder(orderFound);
     }
 
@@ -132,9 +145,31 @@ public class OrderUseCase implements IOrderServicePort  {
                 customerId,
                 orderFound.getStatus()
         );
+        OrderStatusModel prevStatus = orderFound.getStatus();
         orderFound.setStatus(OrderStatusModel.CANCELADO);
+        reecordOrderTraceability(orderFound, prevStatus, orderFound.getStatus());
         orderPersistencePort.updateOrder(orderFound);
     }
 
+
+    //Gestionar trazabiliad
+    public void reecordOrderTraceability(OrderModel order, OrderStatusModel prevStatus, OrderStatusModel newStatus) {
+        String emailChef = userSessionPort.getUserEmail();
+
+        UserContactInfoDto userContactInfoCustomer = orderPersistencePort.getInfoContactUser(order.getCustomerId());
+        //Envio data a trazabilidad
+        TraceabilityRequestDto traceabilityRequestDto = new TraceabilityRequestDto(
+                order.getId(),
+                order.getCustomerId(),
+                userContactInfoCustomer.email(),
+                prevStatus.toString(),
+                newStatus.toString(),
+                order.getChefId(),
+                emailChef,
+                order.getRestaurant().getId()
+        );
+
+        traceabilityPersistencePort.saveOrderLog(traceabilityRequestDto);
+    }
 
 }

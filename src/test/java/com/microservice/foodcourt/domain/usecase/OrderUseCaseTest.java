@@ -1,15 +1,15 @@
 package com.microservice.foodcourt.domain.usecase;
 
+import com.microservice.foodcourt.domain.dto.TraceabilityRequestDto;
+import com.microservice.foodcourt.domain.dto.UserContactInfoDto;
 import com.microservice.foodcourt.domain.exception.InvalidPaginationParameterException;
 import com.microservice.foodcourt.domain.exception.InvalidVerificationCodeException;
 import com.microservice.foodcourt.domain.exception.UnauthorizedActionException;
 import com.microservice.foodcourt.domain.model.*;
-import com.microservice.foodcourt.domain.spi.IDishPersistencePort;
-import com.microservice.foodcourt.domain.spi.IOrderPersistencePort;
-import com.microservice.foodcourt.domain.spi.IRestaurantPersistencePort;
-import com.microservice.foodcourt.domain.spi.IUserSessionPort;
+import com.microservice.foodcourt.domain.spi.*;
 import com.microservice.foodcourt.domain.validation.OrderUpdateRulesValidation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,6 +37,9 @@ class OrderUseCaseTest {
 
     @Mock
     private IUserSessionPort userSessionPort;
+
+    @Mock
+    private ITraceabilityPersistencePort traceabilityPersistencePort;
 
     @Mock
     private OrderUpdateRulesValidation orderUpdateRulesValidation;
@@ -79,41 +82,111 @@ class OrderUseCaseTest {
     @Test
     void saveOrder_ShouldSetCustomerIdAndCallDependencies() {
         // Arrange
-        when(userSessionPort.getUserId()).thenReturn(99L);
-        when(dishPersistencePort.findById(10L)).thenReturn(new DishModel());
-        when(dishPersistencePort.findById(20L)).thenReturn(new DishModel());
+        Long customerId = 99L;
+        Long restaurantId = 1L;
+        Long dishId1 = 10L;
+        Long dishId2 = 20L;
+
+        DishModel dish1 = new DishModel();
+        dish1.setId(dishId1);
+        DishModel dish2 = new DishModel();
+        dish2.setId(dishId2);
+
+        DishOrderModel dishOrder1 = new DishOrderModel();
+        dishOrder1.setDish(dish1);
+        dishOrder1.setAmount(1);
+
+        DishOrderModel dishOrder2 = new DishOrderModel();
+        dishOrder2.setDish(dish2);
+        dishOrder2.setAmount(2);
+
+        RestaurantModel restaurant = new RestaurantModel();
+        restaurant.setId(restaurantId);
+
+        OrderModel orderModel = new OrderModel();
+        orderModel.setRestaurant(restaurant);
+        orderModel.setDishes(List.of(dishOrder1, dishOrder2));
+
+        OrderModel orderSaved = new OrderModel();
+        orderSaved.setId(500L);
+        orderSaved.setStatus(OrderStatusModel.PENDIENTE);
+        orderSaved.setCustomerId(customerId);
+        orderSaved.setChefId(123L);
+        orderSaved.setRestaurant(restaurant);
+
+        when(userSessionPort.getUserId()).thenReturn(customerId);
+        when(dishPersistencePort.findById(dishId1)).thenReturn(dish1);
+        when(dishPersistencePort.findById(dishId2)).thenReturn(dish2);
+        when(orderPersistencePort.saveOrder(orderModel)).thenReturn(orderSaved);
+        when(orderPersistencePort.getInfoContactUser(customerId))
+                .thenReturn(new UserContactInfoDto("+573001234567", "client@email.com"));
+        when(userSessionPort.getUserEmail()).thenReturn("chef@email.com");
 
         // Act
         orderUseCase.saveOrder(orderModel);
 
         // Assert
-        verify(userSessionPort).getUserId();
-        verify(orderPersistencePort).existsOrderInProcessByCustomerId(eq(99L), anyList());
-        verify(restaurantPersistencePort).validateExist(1L);
-        verify(dishPersistencePort).findById(10L);
-        verify(dishPersistencePort).findById(20L);
-        verify(dishPersistencePort).validateAllDishesBelongToRestaurant(List.of(10L, 20L), 1L);
-        verify(orderPersistencePort).saveOrder(orderModel);
+        assertEquals(customerId, orderModel.getCustomerId());
 
-        assertEquals(99L, orderModel.getCustomerId());
+        verify(userSessionPort).getUserId();
+        verify(orderPersistencePort).existsOrderInProcessByCustomerId(eq(customerId), anyList());
+        verify(restaurantPersistencePort).validateExist(restaurantId);
+        verify(dishPersistencePort).findById(dishId1);
+        verify(dishPersistencePort).findById(dishId2);
+        verify(dishPersistencePort).validateAllDishesBelongToRestaurant(List.of(dishId1, dishId2), restaurantId);
+        verify(orderPersistencePort).saveOrder(orderModel);
+        verify(traceabilityPersistencePort).saveOrderLog(any(TraceabilityRequestDto.class));
     }
+
 
     @Test
     void saveOrder_ShouldValidateOrderStatusCheckBeforeSaving() {
+        Long customerId = 42L;
+        Long restaurantId = 99L;
+        Long dishId = 1L;
 
-        when(userSessionPort.getUserId()).thenReturn(42L);
-        when(dishPersistencePort.findById(anyLong())).thenReturn(new DishModel());
+        // Crear datos mínimos para que el método no lance excepción
+        DishModel dishModel = new DishModel();
+        dishModel.setId(dishId);
 
+        DishOrderModel dishOrderModel = new DishOrderModel();
+        dishOrderModel.setDish(dishModel);
+        dishOrderModel.setAmount(2);
 
+        RestaurantModel restaurantModel = new RestaurantModel();
+        restaurantModel.setId(restaurantId);
+
+        OrderModel orderModel = new OrderModel();
+        orderModel.setRestaurant(restaurantModel);
+        orderModel.setDishes(List.of(dishOrderModel));
+
+        OrderModel savedOrder = new OrderModel();
+        savedOrder.setId(123L);
+        savedOrder.setStatus(OrderStatusModel.PENDIENTE);
+        savedOrder.setCustomerId(customerId);
+        savedOrder.setChefId(99L);
+        savedOrder.setRestaurant(restaurantModel);
+
+        when(userSessionPort.getUserId()).thenReturn(customerId);
+        when(dishPersistencePort.findById(dishId)).thenReturn(dishModel);
+        doNothing().when(restaurantPersistencePort).validateExist(restaurantId);
+        doNothing().when(dishPersistencePort).validateAllDishesBelongToRestaurant(anyList(), eq(restaurantId));
+        when(orderPersistencePort.saveOrder(any(OrderModel.class))).thenReturn(savedOrder);
+        when(orderPersistencePort.getInfoContactUser(anyLong()))
+                .thenReturn(new UserContactInfoDto("+573000000000", "client@email.com"));
+        when(userSessionPort.getUserEmail()).thenReturn("chef@email.com");
+
+        // Act
         orderUseCase.saveOrder(orderModel);
 
-
-        verify(orderPersistencePort, times(1)).existsOrderInProcessByCustomerId(eq(42L), argThat(statusList ->
+        // Assert
+        verify(orderPersistencePort, times(1)).existsOrderInProcessByCustomerId(eq(customerId), argThat(statusList ->
                 statusList.contains(OrderStatusModel.PENDIENTE) &&
                         statusList.contains(OrderStatusModel.PREPARACION) &&
                         statusList.contains(OrderStatusModel.LISTO)
         ));
     }
+
 
     @Test
     void getOrders_shouldReturnListOfRestaurants() {
@@ -176,40 +249,63 @@ class OrderUseCaseTest {
         Long chefId = 100L;
         Long orderId = 200L;
         Long restaurantId = 300L;
+        Long customerId = 400L;
+        String chefEmail = "chef@email.com";
+        String customerEmail = "cliente@email.com";
+        String customerPhone = "+573001234567";
 
+        // Restaurante
         RestaurantModel restaurant = new RestaurantModel();
         restaurant.setId(restaurantId);
 
+        // Orden
         OrderModel order = new OrderModel();
         order.setId(orderId);
         order.setRestaurant(restaurant);
         order.setStatus(OrderStatusModel.PENDIENTE);
         order.setChefId(null);
+        order.setCustomerId(customerId); // 👈 importante para trazabilidad
 
+        // Stubs requeridos
         when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(userSessionPort.getUserEmail()).thenReturn(chefEmail);
         when(orderPersistencePort.isOrderAlreadyAssignedToEmployee(chefId, orderId)).thenReturn(false);
         when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
         when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantId);
+        when(orderPersistencePort.getInfoContactUser(customerId))
+                .thenReturn(new UserContactInfoDto(customerPhone, customerEmail));
 
-        // No exception expected
+        // Act
         orderUseCase.startOrderPreparation(orderId);
 
+        // Assert
         assertEquals(chefId, order.getChefId());
         assertEquals(OrderStatusModel.PREPARACION, order.getStatus());
 
-        verify(orderUpdateRulesValidation).validateDataUpdate(false, null, restaurantId, restaurantId);
+        verify(orderUpdateRulesValidation).validateDataUpdate(
+                false, null, restaurantId, restaurantId
+        );
         verify(orderPersistencePort).updateOrder(order);
+        verify(traceabilityPersistencePort).saveOrderLog(any(TraceabilityRequestDto.class));
     }
+
 
     @Test
     void markOrderAsReady_ShouldUpdateOrderCorrectly() {
+        // Datos de prueba
         Long chefId = 1L;
         Long restaurantId = 10L;
         Long customerId = 20L;
         Long orderId = 100L;
         String phone = "+573001234567";
+        String email = "email@email.com";
         String code = "XYZ789";
+        String chefEmail = "chef@email.com";
 
+        // Mock de DTO
+        UserContactInfoDto userContactInfoDto = new UserContactInfoDto(phone, email);
+
+        // Restaurante y orden
         RestaurantModel restaurant = new RestaurantModel();
         restaurant.setId(restaurantId);
 
@@ -220,18 +316,28 @@ class OrderUseCaseTest {
         order.setRestaurant(restaurant);
         order.setStatus(OrderStatusModel.PREPARACION);
 
+        // Stubbing
         when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(userSessionPort.getUserEmail()).thenReturn(chefEmail);
         when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
         when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantId);
-        when(orderPersistencePort.getPhoneNumberUser(customerId)).thenReturn(phone);
+        when(orderPersistencePort.getInfoContactUser(customerId)).thenReturn(userContactInfoDto);
         when(orderPersistencePort.getCodeVerification(phone)).thenReturn(code);
 
+        // Act
         orderUseCase.markOrderAsReady(orderId);
 
+        // Assert
         assertEquals(OrderStatusModel.LISTO, order.getStatus());
         assertEquals(code, order.getCodeVerification());
+
+        verify(orderUpdateRulesValidation).validateDataMarkReady(
+                restaurantId, restaurantId, chefId, chefId, OrderStatusModel.PREPARACION
+        );
         verify(orderPersistencePort).updateOrder(order);
+        verify(traceabilityPersistencePort).saveOrderLog(any(TraceabilityRequestDto.class));
     }
+
 
     @Test
     void markOrderAsReady_ShouldThrow_WhenRestaurantMismatch() {
@@ -313,28 +419,39 @@ class OrderUseCaseTest {
         Long orderId = 10L;
         String validCode = "abc123";
         Long restaurantId = 10L;
+        Long customerId = 50L;
 
         RestaurantModel restaurant = new RestaurantModel();
         restaurant.setId(restaurantId);
 
         OrderModel order = new OrderModel();
+        order.setId(orderId);
         order.setChefId(chefId);
         order.setCodeVerification(validCode);
         order.setStatus(OrderStatusModel.LISTO);
         order.setRestaurant(restaurant);
+        order.setCustomerId(customerId);
 
         when(userSessionPort.getUserId()).thenReturn(chefId);
+        when(userSessionPort.getUserEmail()).thenReturn("chef@email.com");
         when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
         when(restaurantPersistencePort.getRestaurantByEmployee(chefId)).thenReturn(restaurantId);
+        when(orderPersistencePort.getInfoContactUser(customerId))
+                .thenReturn(new UserContactInfoDto("+573145678923", "cliente@email.com"));
 
+        // Act
         orderUseCase.markOrderAsDelivered(orderId, validCode);
 
+        // Assert
         assertEquals(OrderStatusModel.ENTREGADO, order.getStatus());
+
         verify(orderUpdateRulesValidation).validateDataMarkDelivered(
                 restaurantId, restaurantId, chefId, chefId, OrderStatusModel.LISTO
         );
         verify(orderPersistencePort).updateOrder(order);
+        verify(traceabilityPersistencePort).saveOrderLog(any(TraceabilityRequestDto.class));
     }
+
 
     @Test
     void markOrderAsDelivered_ShouldThrow_WhenCodeIsInvalid() {
@@ -371,23 +488,81 @@ class OrderUseCaseTest {
     void markOrderAsCancelled_ShouldUpdateOrder_WhenValid() {
         Long customerId = 5L;
         Long orderId = 20L;
+        Long restaurantId = 100L;
+        Long chefId = 10L;
 
         OrderModel order = new OrderModel();
+        order.setId(orderId);
         order.setCustomerId(customerId);
+        order.setChefId(chefId);
+        order.setRestaurant(new RestaurantModel());
+        order.getRestaurant().setId(restaurantId);
         order.setStatus(OrderStatusModel.PENDIENTE);
 
         when(userSessionPort.getUserId()).thenReturn(customerId);
+        when(userSessionPort.getUserEmail()).thenReturn("chef@email.com");
         when(orderPersistencePort.getOrderById(orderId)).thenReturn(order);
+        when(orderPersistencePort.getInfoContactUser(customerId))
+                .thenReturn(new UserContactInfoDto("+573145678923", "cliente@email.com"));
 
+        // Act
         orderUseCase.markOrderAsCancelled(orderId);
 
+        // Assert
         assertEquals(OrderStatusModel.CANCELADO, order.getStatus());
+
         verify(orderUpdateRulesValidation).validateDataMarkCancelled(
                 customerId, customerId, OrderStatusModel.PENDIENTE
         );
+
         verify(orderPersistencePort).updateOrder(order);
+        verify(traceabilityPersistencePort).saveOrderLog(any(TraceabilityRequestDto.class));
     }
 
+
+
+    @Test
+    void recordTraceability() {
+        // Arrange
+        Long customerId = 5L;
+        Long chefId = 10L;
+        Long orderId = 100L;
+        Long restaurantId = 50L;
+        String customerEmail = "email@email.com";
+        String chefEmail = "chef@email.com";
+
+        OrderModel orderModel = new OrderModel();
+        orderModel.setId(orderId);
+        orderModel.setCustomerId(customerId);
+        orderModel.setChefId(chefId);
+        orderModel.setRestaurant(new RestaurantModel());
+        orderModel.getRestaurant().setId(restaurantId);
+
+        OrderStatusModel prevStatus = OrderStatusModel.PENDIENTE;
+        OrderStatusModel newStatus = OrderStatusModel.PREPARACION;
+
+        UserContactInfoDto userContactInfoCustomer = new UserContactInfoDto("+573145678923", customerEmail);
+
+        when(userSessionPort.getUserEmail()).thenReturn(chefEmail);
+        when(orderPersistencePort.getInfoContactUser(customerId)).thenReturn(userContactInfoCustomer);
+
+        // Act
+        orderUseCase.reecordOrderTraceability(orderModel, prevStatus, newStatus);
+
+        // Assert
+        TraceabilityRequestDto expectedDto = new TraceabilityRequestDto(
+                orderId,
+                customerId,
+                customerEmail,
+                prevStatus.toString(),
+                newStatus.toString(),
+                chefId,
+                chefEmail,
+                restaurantId
+        );
+
+        verify(traceabilityPersistencePort).saveOrderLog(expectedDto);
+    }
 
 
 }
