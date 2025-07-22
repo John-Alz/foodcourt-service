@@ -11,6 +11,7 @@ import com.microservice.foodcourt.domain.validation.DishRulesValidation;
 import com.microservice.foodcourt.domain.validation.OrderUpdateRulesValidation;
 import com.microservice.foodcourt.domain.validation.RestaurantRulesValidator;
 import com.microservice.foodcourt.infrastructure.clients.MessagingClient;
+import com.microservice.foodcourt.infrastructure.clients.TraceabilityClient;
 import com.microservice.foodcourt.infrastructure.clients.UserClient;
 import com.microservice.foodcourt.infrastructure.out.jpa.adapter.*;
 import com.microservice.foodcourt.infrastructure.out.jpa.mapper.IDishEntityMapper;
@@ -39,6 +40,7 @@ public class BeanConfiguration {
     private final IOrderEntityMapper orderEntityMapper;
 
     private final MessagingClient messagingClient;
+    private final TraceabilityClient traceabilityClient;
 
     @Bean
     public IRestaurantPersistencePort restaurantPersistencePort() {
@@ -82,7 +84,7 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderServicePort orderServicePort() {
-        return new OrderUseCase(orderPersistencePort(), restaurantPersistencePort(), dishPersistencePort(), userSessionPort(), orderUpdateRulesValidation());
+        return new OrderUseCase(orderPersistencePort(), restaurantPersistencePort(), dishPersistencePort(), userSessionPort(), orderUpdateRulesValidation(), traceabilityPersistencePort());
     }
 
     @Bean
@@ -93,6 +95,11 @@ public class BeanConfiguration {
     @Bean
     public OrderUpdateRulesValidation orderUpdateRulesValidation() {
         return new OrderUpdateRulesValidation();
+    }
+
+    @Bean
+    public ITraceabilityPersistencePort traceabilityPersistencePort() {
+        return new TraceabilityClientAdapter(traceabilityClient);
     }
 
 }
